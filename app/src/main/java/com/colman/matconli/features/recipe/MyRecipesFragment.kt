@@ -8,7 +8,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.MenuProvider
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,15 +16,18 @@ import com.colman.matconli.databinding.FragmentMyRecipesBinding
 import com.colman.matconli.features.feed.RecipeAdapter
 import com.colman.matconli.model.Recipe
 import com.colman.matconli.data.repository.RecipeRepository
-import com.google.firebase.auth.FirebaseAuth
+import com.colman.matconli.base.BaseFragment
+import com.colman.matconli.utilis.hide
+import com.colman.matconli.utilis.show
+import com.colman.matconli.utilis.toggleVisibility
 
-class MyRecipesFragment : Fragment(), RecipeAdapter.OnItemClickListener {
+class MyRecipesFragment : BaseFragment(), RecipeAdapter.OnItemClickListener {
 
     private var _binding: FragmentMyRecipesBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var adapter: RecipeAdapter
-    private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+    private val userId by lazy { getCurrentUserId() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -62,11 +64,14 @@ class MyRecipesFragment : Fragment(), RecipeAdapter.OnItemClickListener {
                         findNavController().popBackStack()
                         true
                     }
-                    R.id.action_logout -> {
-                        FirebaseAuth.getInstance().signOut()
+                    R.id.action_profile -> {
                         findNavController().navigate(
-                            MyRecipesFragmentDirections.actionMyRecipesFragmentToLoginFragment()
+                            MyRecipesFragmentDirections.actionMyRecipesFragmentToProfileFragment()
                         )
+                        true
+                    }
+                    R.id.action_logout -> {
+                        performLogout(MyRecipesFragmentDirections.actionMyRecipesFragmentToLoginFragment())
                         true
                     }
                     else -> false
@@ -77,36 +82,36 @@ class MyRecipesFragment : Fragment(), RecipeAdapter.OnItemClickListener {
 
     private fun setupRecyclerView() {
         adapter = RecipeAdapter(listener = this)
-        binding.rvRecipes.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvRecipes.adapter = adapter
+        binding.fragmentMyRecipesRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.fragmentMyRecipesRecyclerView.adapter = adapter
     }
 
     private fun setupClickListeners() {
-        binding.fabAddRecipe.setOnClickListener {
+        binding.fragmentMyRecipesFloatingActionButton.setOnClickListener {
             findNavController().navigate(
                 MyRecipesFragmentDirections.actionMyRecipesFragmentToAddRecipeFragment(null)
             )
         }
 
-        binding.swipeRefresh.setOnRefreshListener {
+        binding.fragmentMyRecipesSwipeRefreshLayout.setOnRefreshListener {
             refreshData()
         }
     }
 
     private fun observeRecipes() {
         RecipeRepository.recipes.observe(viewLifecycleOwner) { recipes ->
-            val myRecipes = recipes.filter { it.ownerId == currentUserId }
+            val myRecipes = recipes.filter { it.ownerId == userId }
             adapter.updateRecipes(myRecipes)
-            binding.tvEmpty.visibility = if (myRecipes.isEmpty()) View.VISIBLE else View.GONE
-            binding.rvRecipes.visibility = if (myRecipes.isEmpty()) View.GONE else View.VISIBLE
+            binding.fragmentMyRecipesTextViewEmpty.visibility = if (myRecipes.isEmpty()) View.VISIBLE else View.GONE
+            binding.fragmentMyRecipesRecyclerView.visibility = if (myRecipes.isEmpty()) View.GONE else View.VISIBLE
         }
     }
 
     private fun refreshData() {
-        binding.progressBar.visibility = View.VISIBLE
+        binding.fragmentMyRecipesProgressBar.show()
         RecipeRepository.refreshAllRecipes().observe(viewLifecycleOwner) {
-            binding.progressBar.visibility = View.GONE
-            binding.swipeRefresh.isRefreshing = false
+            binding.fragmentMyRecipesProgressBar.hide()
+            binding.fragmentMyRecipesSwipeRefreshLayout.isRefreshing = false
         }
     }
 

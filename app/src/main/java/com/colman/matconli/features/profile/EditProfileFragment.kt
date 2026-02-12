@@ -46,19 +46,19 @@ class EditProfileFragment : Fragment() {
         viewModel.currentUser.observe(viewLifecycleOwner) { user ->
             _binding?.let { binding ->
                 user?.let {
-                    binding.etName.setText(it.name)
-                    binding.etAvatarUrl.setText(it.avatarUrl ?: "")
-                    binding.tvEmail.text = "Email: ${it.email}"
-                    ImageUtils.loadImage(binding.ivProfileImage, it.avatarUrl, R.drawable.ic_profile_placeholder)
+                    binding.fragmentEditProfileEditTextName.setText(it.name)
+                    binding.fragmentEditProfileEditTextAvatarUrl.setText(it.avatarUrl ?: "")
+                    binding.fragmentEditProfileTextViewEmail.text = "Email: ${it.email}"
+                    ImageUtils.loadImage(binding.fragmentEditProfileImageView, it.avatarUrl, R.drawable.ic_profile_placeholder)
                 }
             }
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             _binding?.let { binding ->
-                binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-                binding.btnSave.isEnabled = !isLoading
-                binding.btnCancel.isEnabled = !isLoading
+                binding.fragmentEditProfileProgressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+                binding.fragmentEditProfileButtonSave.isEnabled = !isLoading
+                binding.fragmentEditProfileButtonCancel.isEnabled = !isLoading
             }
         }
 
@@ -78,37 +78,37 @@ class EditProfileFragment : Fragment() {
 
     private fun setupClickListeners() {
         _binding?.let { binding ->
-            binding.btnSave.setOnClickListener {
-                val name = binding.etName.text.toString().trim()
-                val avatarUrl = binding.etAvatarUrl.text.toString().trim().ifEmpty { null }
+            binding.fragmentEditProfileButtonSave.setOnClickListener {
+                val name = binding.fragmentEditProfileEditTextName.text.toString().trim()
+                val avatarUrl = binding.fragmentEditProfileEditTextAvatarUrl.text.toString().trim().ifEmpty { null }
 
                 if (name.isEmpty()) {
-                    binding.tilName.error = "Name is required"
+                    binding.fragmentEditProfileTextInputLayoutName.error = "Name is required"
                     return@setOnClickListener
                 }
 
-                binding.tilName.error = null
+                binding.fragmentEditProfileTextInputLayoutName.error = null
                 viewModel.updateProfile(name, avatarUrl)
             }
 
-            binding.btnCancel.setOnClickListener {
+            binding.fragmentEditProfileButtonCancel.setOnClickListener {
                 findNavController().popBackStack()
             }
 
-            binding.btnChangeImage.setOnClickListener {
-                binding.etAvatarUrl.requestFocus()
+            binding.fragmentEditProfileButtonChangeImage.setOnClickListener {
+                binding.fragmentEditProfileEditTextAvatarUrl.requestFocus()
             }
         }
     }
 
     private fun setupImageUrlPreview() {
         _binding?.let { binding ->
-            binding.etAvatarUrl.doAfterTextChanged { text ->
+            binding.fragmentEditProfileEditTextAvatarUrl.doAfterTextChanged { text ->
                 val url = text.toString().trim()
                 if (url.isNotEmpty()) {
-                    ImageUtils.loadImage(binding.ivProfileImage, url, R.drawable.ic_profile_placeholder)
+                    ImageUtils.loadImage(binding.fragmentEditProfileImageView, url, R.drawable.ic_profile_placeholder)
                 } else {
-                    binding.ivProfileImage.setImageResource(R.drawable.ic_profile_placeholder)
+                    binding.fragmentEditProfileImageView.setImageResource(R.drawable.ic_profile_placeholder)
                 }
             }
         }

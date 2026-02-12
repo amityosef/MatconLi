@@ -8,7 +8,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.MenuProvider
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,9 +16,12 @@ import com.colman.matconli.R
 import com.colman.matconli.databinding.FragmentFeedBinding
 import com.colman.matconli.data.repository.RecipeRepository
 import com.colman.matconli.model.Recipe
-import com.google.firebase.auth.FirebaseAuth
+import com.colman.matconli.base.BaseFragment
+import com.colman.matconli.utilis.hide
+import com.colman.matconli.utilis.show
+import com.colman.matconli.utilis.toggleVisibility
 
-class RecipeListFragment : Fragment(), RecipeAdapter.OnItemClickListener {
+class RecipeListFragment : BaseFragment(), RecipeAdapter.OnItemClickListener {
 
     private var _binding: FragmentFeedBinding? = null
     private val binding get() = _binding!!
@@ -57,6 +59,12 @@ class RecipeListFragment : Fragment(), RecipeAdapter.OnItemClickListener {
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
+                    R.id.action_my_recipes -> {
+                        findNavController().navigate(
+                            RecipeListFragmentDirections.actionFeedFragmentToMyRecipesFragment()
+                        )
+                        true
+                    }
                     R.id.action_profile -> {
                         findNavController().navigate(
                             RecipeListFragmentDirections.actionFeedFragmentToProfileFragment()
@@ -64,11 +72,7 @@ class RecipeListFragment : Fragment(), RecipeAdapter.OnItemClickListener {
                         true
                     }
                     R.id.action_logout -> {
-                        (activity as? MainActivity)?.clearUserProfile()
-                        FirebaseAuth.getInstance().signOut()
-                        findNavController().navigate(
-                            RecipeListFragmentDirections.actionFeedFragmentToLoginFragment()
-                        )
+                        performLogout(RecipeListFragmentDirections.actionFeedFragmentToLoginFragment())
                         true
                     }
                     else -> false
@@ -79,19 +83,19 @@ class RecipeListFragment : Fragment(), RecipeAdapter.OnItemClickListener {
 
     private fun setupRecyclerView() {
         adapter = RecipeAdapter(listener = this)
-        binding.rvRecipes.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvRecipes.adapter = adapter
+        binding.fragmentFeedRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.fragmentFeedRecyclerView.adapter = adapter
     }
 
     private fun setupClickListeners() {
-        binding.fabAddRecipe.visibility = View.VISIBLE
-        binding.fabAddRecipe.setOnClickListener {
+        binding.fragmentFeedFloatingActionButton.visibility = View.VISIBLE
+        binding.fragmentFeedFloatingActionButton.setOnClickListener {
             findNavController().navigate(
                 RecipeListFragmentDirections.actionFeedFragmentToAddRecipeFragment(null)
             )
         }
 
-        binding.swipeRefresh.setOnRefreshListener {
+        binding.fragmentFeedSwipeRefreshLayout.setOnRefreshListener {
             refreshData()
         }
     }
@@ -101,8 +105,8 @@ class RecipeListFragment : Fragment(), RecipeAdapter.OnItemClickListener {
     private fun observeRecipes() {
         RecipeRepository.recipes.observe(viewLifecycleOwner) { recipes ->
             adapter.updateRecipes(recipes)
-            binding.tvEmpty.visibility = if (recipes.isEmpty()) View.VISIBLE else View.GONE
-            binding.rvRecipes.visibility = if (recipes.isEmpty()) View.GONE else View.VISIBLE
+            binding.fragmentFeedTextViewEmpty.visibility = if (recipes.isEmpty()) View.VISIBLE else View.GONE
+            binding.fragmentFeedRecyclerView.visibility = if (recipes.isEmpty()) View.GONE else View.VISIBLE
 
             if (!hasLoadedInitial && recipes.isEmpty()) {
                 hasLoadedInitial = true
@@ -112,10 +116,10 @@ class RecipeListFragment : Fragment(), RecipeAdapter.OnItemClickListener {
     }
 
     private fun refreshData() {
-        binding.progressBar.visibility = View.VISIBLE
+        binding.fragmentFeedProgressBar.show()
         RecipeRepository.refreshAllRecipes().observe(viewLifecycleOwner) {
-            binding.progressBar.visibility = View.GONE
-            binding.swipeRefresh.isRefreshing = false
+            binding.fragmentFeedProgressBar.hide()
+            binding.fragmentFeedSwipeRefreshLayout.isRefreshing = false
         }
     }
 

@@ -25,17 +25,19 @@ class FirebaseModel {
             }
     }
 
-    fun addRecipe(recipe: Recipe, completion: () -> Unit) {
+    fun saveRecipe(recipe: Recipe, completion: () -> Unit) {
         db.collection(RECIPES)
             .document(recipe.id)
             .set(recipe.toJson)
-            .addOnSuccessListener { documentReference ->
+            .addOnSuccessListener {
                 completion()
             }
-            .addOnFailureListener { e ->
+            .addOnFailureListener {
                 completion()
             }
     }
+
+    fun updateRecipe(recipe: Recipe, completion: () -> Unit) = saveRecipe(recipe, completion)
 
     fun deleteRecipe(recipe: Recipe, completion: () -> Unit) {
         db.collection(RECIPES)
@@ -46,22 +48,6 @@ class FirebaseModel {
             }
             .addOnFailureListener {
                 completion()
-            }
-    }
-
-    fun getRecipeById(id: String, completion: (Recipe?) -> Unit) {
-        db.collection(RECIPES)
-            .document(id)
-            .get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    completion(Recipe.fromJson(document.data ?: return@addOnSuccessListener))
-                } else {
-                    completion(null)
-                }
-            }
-            .addOnFailureListener {
-                completion(null)
             }
     }
 }

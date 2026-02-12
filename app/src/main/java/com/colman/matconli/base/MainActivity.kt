@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
 
         setupToolbar()
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.activity_main_constraint_layout)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
@@ -40,11 +40,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupToolbar() {
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        val toolbar = findViewById<MaterialToolbar>(R.id.activity_main_toolbar)
         setSupportActionBar(toolbar)
-
-        // profileImageView = toolbar.findViewById(R.id.ivUserProfile)
-        // profileImageView?.setImageResource(R.drawable.ic_profile_placeholder)
     }
 
     fun loadUserProfile() {
@@ -106,7 +103,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSupportNavigateUp(): Boolean {
         val navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+            .findFragmentById(R.id.activity_main_nav_host_fragment) as NavHostFragment
         return navHostFragment.navController.navigateUp() || super.onSupportNavigateUp()
     }
 }

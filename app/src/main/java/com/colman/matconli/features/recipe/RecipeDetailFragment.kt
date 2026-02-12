@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.colman.matconli.R
@@ -13,9 +12,11 @@ import com.colman.matconli.databinding.FragmentRecipeDetailBinding
 import com.colman.matconli.model.Recipe
 import com.colman.matconli.data.repository.RecipeRepository
 import com.colman.matconli.utilis.ImageUtils
-import com.google.firebase.auth.FirebaseAuth
+import com.colman.matconli.utilis.hide
+import com.colman.matconli.utilis.show
+import com.colman.matconli.base.BaseFragment
 
-class RecipeDetailFragment : Fragment() {
+class RecipeDetailFragment : BaseFragment() {
 
     private var _binding: FragmentRecipeDetailBinding? = null
     private val binding get() = _binding!!
@@ -40,13 +41,13 @@ class RecipeDetailFragment : Fragment() {
     }
 
     private fun loadRecipe() {
-        binding.progressBar.visibility = View.VISIBLE
-        RecipeRepository.getRecipeById(args.recipeId) { loadedRecipe ->
+        binding.fragmentRecipeDetailProgressBar.show()
+        RecipeRepository.getRecipeById(args.recipeId) { recipe ->
             activity?.runOnUiThread {
                 if (_binding == null) return@runOnUiThread
-                binding.progressBar.visibility = View.GONE
-                loadedRecipe?.let {
-                    recipe = it
+                binding.fragmentRecipeDetailProgressBar.hide()
+                recipe?.let {
+                    this.recipe = it
                     displayRecipe(it)
                 }
             }
@@ -54,19 +55,19 @@ class RecipeDetailFragment : Fragment() {
     }
 
     private fun displayRecipe(recipe: Recipe) {
-        binding.tvTitle.text = recipe.title
-        binding.tvDescription.text = recipe.description
-        ImageUtils.loadImage(binding.ivRecipeImage, recipe.imageUrl, R.drawable.ic_recipe_placeholder)
+        binding.fragmentRecipeDetailTextViewTitle.text = recipe.title
+        binding.fragmentRecipeDetailTextViewDescription.text = recipe.description
+        ImageUtils.loadImage(binding.fragmentRecipeDetailImageView, recipe.imageUrl, R.drawable.ic_recipe_placeholder)
 
-        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+        val currentUserId = getCurrentUserId()
         if (currentUserId == recipe.ownerId) {
-            binding.btnEdit.visibility = View.VISIBLE
-            binding.btnDelete.visibility = View.VISIBLE
+            binding.fragmentRecipeDetailButtonEdit.visibility = View.VISIBLE
+            binding.fragmentRecipeDetailButtonDelete.visibility = View.VISIBLE
         }
     }
 
     private fun setupClickListeners() {
-        binding.btnEdit.setOnClickListener {
+        binding.fragmentRecipeDetailButtonEdit.setOnClickListener {
             recipe?.let {
                 findNavController().navigate(
                     RecipeDetailFragmentDirections.actionRecipeDetailFragmentToAddRecipeFragment(it.id)
@@ -74,13 +75,13 @@ class RecipeDetailFragment : Fragment() {
             }
         }
 
-        binding.btnDelete.setOnClickListener {
+        binding.fragmentRecipeDetailButtonDelete.setOnClickListener {
             recipe?.let { r ->
-                binding.progressBar.visibility = View.VISIBLE
+                binding.fragmentRecipeDetailProgressBar.show()
                 RecipeRepository.deleteRecipe(r) { success ->
                     activity?.runOnUiThread {
                         if (_binding == null) return@runOnUiThread
-                        binding.progressBar.visibility = View.GONE
+                        binding.fragmentRecipeDetailProgressBar.hide()
                         if (success) {
                             Toast.makeText(requireContext(), "Recipe deleted", Toast.LENGTH_SHORT).show()
                             findNavController().popBackStack()

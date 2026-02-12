@@ -5,23 +5,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="24dp"
-    tools:context=".ui.auth.LoginFragment">
+    tools:context=".features.auth.LoginFragment">
 
     <TextView
-        android:id="@+id/tvTitle"
+        android:id="@+id/fragment_login_text_view_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="מתכון-לי"
         android:textSize="32sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/tilEmail"
+        app:layout_constraintBottom_toTopOf="@id/fragment_login_text_input_layout_email"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
-        android:id="@+id/tvSubtitle"
+        android:id="@+id/fragment_login_text_view_subtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -29,10 +29,10 @@
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+        app:layout_constraintTop_toBottomOf="@id/fragment_login_text_view_title" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tilEmail"
+        android:id="@+id/fragment_login_text_input_layout_email"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -40,10 +40,10 @@
         android:hint="Email"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvSubtitle">
+        app:layout_constraintTop_toBottomOf="@id/fragment_login_text_view_subtitle">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etEmail"
+            android:id="@+id/fragment_login_edit_text_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textEmailAddress" />
@@ -51,7 +51,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tilPassword"
+        android:id="@+id/fragment_login_text_input_layout_password"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -60,10 +60,10 @@
         app:endIconMode="password_toggle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tilEmail">
+        app:layout_constraintTop_toBottomOf="@id/fragment_login_text_input_layout_email">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etPassword"
+            android:id="@+id/fragment_login_edit_text_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword" />
@@ -71,27 +71,27 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnLogin"
+        android:id="@+id/fragment_login_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:text="Login"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tilPassword" />
+        app:layout_constraintTop_toBottomOf="@id/fragment_login_text_input_layout_password" />
 
     <ProgressBar
-        android:id="@+id/progressBar"
+        android:id="@+id/fragment_login_progress_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/btnLogin"
-        app:layout_constraintEnd_toEndOf="@id/btnLogin"
-        app:layout_constraintStart_toStartOf="@id/btnLogin"
-        app:layout_constraintTop_toTopOf="@id/btnLogin" />
+        app:layout_constraintBottom_toBottomOf="@id/fragment_login_button"
+        app:layout_constraintEnd_toEndOf="@id/fragment_login_button"
+        app:layout_constraintStart_toStartOf="@id/fragment_login_button"
+        app:layout_constraintTop_toTopOf="@id/fragment_login_button" />
 
     <TextView
-        android:id="@+id/tvRegister"
+        android:id="@+id/fragment_login_text_view_register"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -99,7 +99,7 @@
         android:textColor="?attr/colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnLogin" />
+        app:layout_constraintTop_toBottomOf="@id/fragment_login_button" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

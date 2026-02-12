@@ -3,14 +3,14 @@ package com.colman.matconli.features.auth
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.colman.matconli.data.models.FirebaseAuthModel
 import com.colman.matconli.data.repository.UserRepository
 import com.colman.matconli.model.User
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 
 class AuthViewModel : ViewModel() {
 
-    private val auth = FirebaseAuth.getInstance()
+    private val authModel = FirebaseAuthModel()
 
     private val _authState = MutableLiveData<AuthState>()
     val authState: LiveData<AuthState> = _authState
@@ -19,7 +19,7 @@ class AuthViewModel : ViewModel() {
     val currentUser: LiveData<FirebaseUser?> = _currentUser
 
     init {
-        _currentUser.value = auth.currentUser
+        _currentUser.value = authModel.currentUser
     }
 
     fun login(email: String, password: String) {
@@ -29,22 +29,25 @@ class AuthViewModel : ViewModel() {
         }
 
         _authState.value = AuthState.Loading
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnSuccessListener {
-                val userId = auth.currentUser?.uid
+        authModel.signIn(
+            email = email,
+            password = password,
+            onSuccess = { user ->
+                val userId = user?.uid
                 if (userId != null) {
                     UserRepository.ensureUserExists(userId) { success ->
-                        _currentUser.value = auth.currentUser
+                        _currentUser.value = authModel.currentUser
                         _authState.value = AuthState.Success
                     }
                 } else {
-                    _currentUser.value = auth.currentUser
+                    _currentUser.value = authModel.currentUser
                     _authState.value = AuthState.Success
                 }
+            },
+            onFailure = { errorMessage ->
+                _authState.value = AuthState.Error(errorMessage)
             }
-            .addOnFailureListener { e ->
-                _authState.value = AuthState.Error(e.message ?: "Login failed")
-            }
+        )
     }
 
     fun register(name: String, email: String, password: String, confirmPassword: String) {
@@ -64,10 +67,12 @@ class AuthViewModel : ViewModel() {
         }
 
         _authState.value = AuthState.Loading
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnSuccessListener { authResult ->
-                val userId = authResult.user?.uid ?: return@addOnSuccessListener
-                val userEmail = authResult.user?.email ?: email
+        authModel.signUp(
+            email = email,
+            password = password,
+            onSuccess = { user ->
+                val userId = user?.uid ?: return@signUp
+                val userEmail = user.email ?: email
 
                 val newUser = User(
                     id = userId,
@@ -79,25 +84,26 @@ class AuthViewModel : ViewModel() {
 
                 UserRepository.createUser(newUser) { success ->
                     if (success) {
-                        _currentUser.value = auth.currentUser
+                        _currentUser.value = authModel.currentUser
                         _authState.value = AuthState.Success
                     } else {
                         _authState.value = AuthState.Error("Failed to create user profile")
                     }
                 }
+            },
+            onFailure = { errorMessage ->
+                _authState.value = AuthState.Error(errorMessage)
             }
-            .addOnFailureListener { e ->
-                _authState.value = AuthState.Error(e.message ?: "Registration failed")
-            }
+        )
     }
 
     fun logout() {
-        auth.signOut()
+        authModel.signOut()
         _currentUser.value = null
         _authState.value = AuthState.Idle
     }
 
-    fun isLoggedIn(): Boolean = auth.currentUser != null
+    fun isLoggedIn(): Boolean = authModel.isLoggedIn()
 
     fun resetState() {
         _authState.value = AuthState.Idle

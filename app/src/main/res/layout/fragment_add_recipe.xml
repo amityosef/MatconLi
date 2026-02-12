@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.recipe.AddRecipeFragment">
+    tools:context=".features.recipe.AddRecipeFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -12,7 +12,7 @@
         android:padding="16dp">
 
         <ImageView
-            android:id="@+id/ivRecipeImage"
+            android:id="@+id/fragment_add_recipe_image_view"
             android:layout_width="0dp"
             android:layout_height="200dp"
             android:background="@color/material_dynamic_neutral90"
@@ -23,20 +23,20 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSelectImage"
+            android:id="@+id/fragment_add_recipe_button_select_image"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Take Photo"
             app:icon="@android:drawable/ic_menu_camera"
-            app:layout_constraintEnd_toStartOf="@id/btnGallery"
+            app:layout_constraintEnd_toStartOf="@id/fragment_add_recipe_button_gallery"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ivRecipeImage" />
+            app:layout_constraintTop_toBottomOf="@id/fragment_add_recipe_image_view" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnGallery"
+            android:id="@+id/fragment_add_recipe_button_gallery"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -45,11 +45,11 @@
             android:text="Gallery"
             app:icon="@android:drawable/ic_menu_gallery"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/btnSelectImage"
-            app:layout_constraintTop_toBottomOf="@id/ivRecipeImage" />
+            app:layout_constraintStart_toEndOf="@id/fragment_add_recipe_button_select_image"
+            app:layout_constraintTop_toBottomOf="@id/fragment_add_recipe_image_view" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilTitle"
+            android:id="@+id/fragment_add_recipe_text_input_layout_title"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -57,10 +57,10 @@
             android:hint="Recipe Title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btnSelectImage">
+            app:layout_constraintTop_toBottomOf="@id/fragment_add_recipe_button_select_image">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etTitle"
+                android:id="@+id/fragment_add_recipe_edit_text_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text" />
@@ -68,7 +68,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilDescription"
+            android:id="@+id/fragment_add_recipe_text_input_layout_description"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -76,10 +76,10 @@
             android:hint="Description"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tilTitle">
+            app:layout_constraintTop_toBottomOf="@id/fragment_add_recipe_text_input_layout_title">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etDescription"
+                android:id="@+id/fragment_add_recipe_edit_text_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="top"
@@ -89,24 +89,24 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSave"
+            android:id="@+id/fragment_add_recipe_button_save"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:text="Save Recipe"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tilDescription" />
+            app:layout_constraintTop_toBottomOf="@id/fragment_add_recipe_text_input_layout_description" />
 
         <ProgressBar
-            android:id="@+id/progressBar"
+            android:id="@+id/fragment_add_recipe_progress_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@id/btnSave"
-            app:layout_constraintEnd_toEndOf="@id/btnSave"
-            app:layout_constraintStart_toStartOf="@id/btnSave"
-            app:layout_constraintTop_toTopOf="@id/btnSave" />
+            app:layout_constraintBottom_toBottomOf="@id/fragment_add_recipe_button_save"
+            app:layout_constraintEnd_toEndOf="@id/fragment_add_recipe_button_save"
+            app:layout_constraintStart_toStartOf="@id/fragment_add_recipe_button_save"
+            app:layout_constraintTop_toTopOf="@id/fragment_add_recipe_button_save" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -22,8 +22,8 @@ class RecipeAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(recipe: Recipe) {
-            binding.tvTitle.text = recipe.title
-            ImageUtils.loadImage(binding.ivRecipe, recipe.imageUrl, R.drawable.ic_recipe_placeholder)
+            binding.itemRecipeTextViewTitle.text = recipe.title
+            ImageUtils.loadImage(binding.itemRecipeImageView, recipe.imageUrl, R.drawable.ic_recipe_placeholder)
 
             binding.root.setOnClickListener {
                 listener.onItemClick(recipe)

@@ -10,6 +10,8 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.colman.matconli.base.MainActivity
 import com.colman.matconli.databinding.FragmentRegisterBinding
+import com.colman.matconli.utilis.hide
+import com.colman.matconli.utilis.show
 
 class RegisterFragment : Fragment() {
 
@@ -35,15 +37,15 @@ class RegisterFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        binding.btnRegister.setOnClickListener {
-            val name = binding.etName.text.toString().trim()
-            val email = binding.etEmail.text.toString().trim()
-            val password = binding.etPassword.text.toString()
-            val confirmPassword = binding.etConfirmPassword.text.toString()
+        binding.fragmentRegisterButton.setOnClickListener {
+            val name = binding.fragmentRegisterEditTextName.text.toString().trim()
+            val email = binding.fragmentRegisterEditTextEmail.text.toString().trim()
+            val password = binding.fragmentRegisterEditTextPassword.text.toString()
+            val confirmPassword = binding.fragmentRegisterEditTextConfirmPassword.text.toString()
             viewModel.register(name, email, password, confirmPassword)
         }
 
-        binding.tvLogin.setOnClickListener {
+        binding.fragmentRegisterTextViewLogin.setOnClickListener {
             findNavController().navigate(
                 RegisterFragmentDirections.actionRegisterFragmentToLoginFragment()
             )
@@ -54,22 +56,21 @@ class RegisterFragment : Fragment() {
         viewModel.authState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is AuthViewModel.AuthState.Loading -> {
-                    binding.progressBar.visibility = View.VISIBLE
-                    binding.btnRegister.isEnabled = false
+                    binding.fragmentRegisterProgressBar.show()
+                    binding.fragmentRegisterButton.isEnabled = false
                 }
                 is AuthViewModel.AuthState.Success -> {
-                    binding.progressBar.visibility = View.GONE
-                    (activity as? MainActivity)?.loadUserProfile()
+                    binding.fragmentRegisterProgressBar.hide()
                     navigateToFeed()
                 }
                 is AuthViewModel.AuthState.Error -> {
-                    binding.progressBar.visibility = View.GONE
-                    binding.btnRegister.isEnabled = true
+                    binding.fragmentRegisterProgressBar.hide()
+                    binding.fragmentRegisterButton.isEnabled = true
                     Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
                 }
                 is AuthViewModel.AuthState.Idle -> {
-                    binding.progressBar.visibility = View.GONE
-                    binding.btnRegister.isEnabled = true
+                    binding.fragmentRegisterProgressBar.hide()
+                    binding.fragmentRegisterButton.isEnabled = true
                 }
             }
         }

@@ -10,7 +10,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
-import android.util.Base64
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -22,7 +21,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.MenuProvider
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -30,14 +28,15 @@ import com.colman.matconli.R
 import com.colman.matconli.databinding.FragmentAddRecipeBinding
 import com.colman.matconli.model.Recipe
 import com.colman.matconli.data.repository.RecipeRepository
+import com.colman.matconli.data.models.StorageModel
 import com.colman.matconli.utilis.ImageUtils
-import com.google.firebase.auth.FirebaseAuth
-import java.io.ByteArrayOutputStream
+import com.colman.matconli.utilis.hide
+import com.colman.matconli.utilis.show
+import com.colman.matconli.base.BaseFragment
 import java.io.File
-import java.io.InputStream
 import java.util.UUID
 
-class AddRecipeFragment : Fragment() {
+class AddRecipeFragment : BaseFragment() {
 
     private var _binding: FragmentAddRecipeBinding? = null
     private val binding get() = _binding!!
@@ -46,6 +45,7 @@ class AddRecipeFragment : Fragment() {
     private var existingRecipe: Recipe? = null
     private var selectedImageUri: Uri? = null
     private var photoUri: Uri? = null
+    private val storageModel = StorageModel()
 
     private val cameraPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -119,15 +119,15 @@ class AddRecipeFragment : Fragment() {
     }
 
     private fun loadExistingRecipe(id: String) {
-        binding.progressBar.visibility = View.VISIBLE
+        binding.fragmentAddRecipeProgressBar.show()
         RecipeRepository.getRecipeById(id) { recipe ->
             activity?.runOnUiThread {
                 if (_binding == null) return@runOnUiThread
-                binding.progressBar.visibility = View.GONE
+                binding.fragmentAddRecipeProgressBar.hide()
                 recipe?.let {
                     existingRecipe = it
-                    binding.etTitle.setText(it.title)
-                    binding.etDescription.setText(it.description)
+                    binding.fragmentAddRecipeEditTextTitle.setText(it.title)
+                    binding.fragmentAddRecipeEditTextDescription.setText(it.description)
                     loadImagePreview(it.imageUrl)
                 }
             }
@@ -135,7 +135,7 @@ class AddRecipeFragment : Fragment() {
     }
 
     private fun loadImagePreview(url: String?) {
-        ImageUtils.loadImage(binding.ivRecipeImage, url, R.drawable.ic_recipe_placeholder)
+        ImageUtils.loadImage(binding.fragmentAddRecipeImageView, url, R.drawable.ic_recipe_placeholder)
     }
 
     private fun openCamera() {
@@ -163,11 +163,11 @@ class AddRecipeFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        binding.btnSave.setOnClickListener {
+        binding.fragmentAddRecipeButtonSave.setOnClickListener {
             saveRecipe()
         }
 
-        binding.btnSelectImage.setOnClickListener {
+        binding.fragmentAddRecipeButtonSelectImage.setOnClickListener {
             if (ContextCompat.checkSelfPermission(
                     requireContext(),
                     Manifest.permission.CAMERA
@@ -179,50 +179,77 @@ class AddRecipeFragment : Fragment() {
             }
         }
 
-        binding.btnGallery.setOnClickListener {
+        binding.fragmentAddRecipeButtonGallery.setOnClickListener {
             openGallery()
         }
     }
 
     private fun saveRecipe() {
-        val title = binding.etTitle.text.toString().trim()
-        val description = binding.etDescription.text.toString().trim()
+        val title = binding.fragmentAddRecipeEditTextTitle.text.toString().trim()
+        val description = binding.fragmentAddRecipeEditTextDescription.text.toString().trim()
 
         if (title.isBlank() || description.isBlank()) {
             Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser == null) {
+        val currentUserId = getCurrentUserId()
+        if (currentUserId == null) {
             Toast.makeText(requireContext(), "Please login first", Toast.LENGTH_SHORT).show()
             return
         }
 
-        binding.progressBar.visibility = View.VISIBLE
-        binding.btnSave.isEnabled = false
+        binding.fragmentAddRecipeProgressBar.show()
+        binding.fragmentAddRecipeButtonSave.isEnabled = false
+
+        val recipeId = existingRecipe?.id ?: UUID.randomUUID().toString()
 
         if (selectedImageUri != null) {
             try {
-                val imageDataUri = convertImageToDataUri(selectedImageUri!!)
-                createAndSaveRecipe(title, description, imageDataUri, currentUser.uid)
+                val bitmap = getBitmapFromUri(selectedImageUri!!)
+                val tempRecipe = Recipe(
+                    id = recipeId,
+                    title = title,
+                    description = description,
+                    imageUrl = null,
+                    ownerId = currentUserId,
+                    lastUpdated = System.currentTimeMillis()
+                )
+
+                // Upload image to Firebase Storage
+                storageModel.uploadRecipeImage(
+                    StorageModel.StorageAPI.FIREBASE,
+                    bitmap,
+                    tempRecipe
+                ) { imageUrl ->
+                    activity?.runOnUiThread {
+                        if (_binding == null) return@runOnUiThread
+                        if (imageUrl != null) {
+                            createAndSaveRecipe(title, description, imageUrl, currentUserId, recipeId)
+                        } else {
+                            binding.fragmentAddRecipeProgressBar.hide()
+                            binding.fragmentAddRecipeButtonSave.isEnabled = true
+                            Toast.makeText(requireContext(), "Failed to upload image", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
             } catch (e: Exception) {
-                binding.progressBar.visibility = View.GONE
-                binding.btnSave.isEnabled = true
+                binding.fragmentAddRecipeProgressBar.hide()
+                binding.fragmentAddRecipeButtonSave.isEnabled = true
                 Toast.makeText(requireContext(), "Failed to process image", Toast.LENGTH_SHORT).show()
             }
         } else {
-            createAndSaveRecipe(title, description, existingRecipe?.imageUrl, currentUser.uid)
+            createAndSaveRecipe(title, description, existingRecipe?.imageUrl, currentUserId, recipeId)
         }
     }
 
-    private fun convertImageToDataUri(uri: Uri): String {
+    private fun getBitmapFromUri(uri: Uri): Bitmap {
         val inputStream = requireContext().contentResolver.openInputStream(uri)
         val bitmap = BitmapFactory.decodeStream(inputStream)
         inputStream?.close()
 
         val maxSize = 800
-        val scaledBitmap = if (bitmap.width > maxSize || bitmap.height > maxSize) {
+        return if (bitmap.width > maxSize || bitmap.height > maxSize) {
             val scale = maxSize.toFloat() / Math.max(bitmap.width, bitmap.height)
             val newWidth = (bitmap.width * scale).toInt()
             val newHeight = (bitmap.height * scale).toInt()
@@ -230,23 +257,11 @@ class AddRecipeFragment : Fragment() {
         } else {
             bitmap
         }
-
-        val outputStream = ByteArrayOutputStream()
-        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
-        val byteArray = outputStream.toByteArray()
-        val base64String = Base64.encodeToString(byteArray, Base64.DEFAULT)
-
-        if (scaledBitmap != bitmap) {
-            scaledBitmap.recycle()
-        }
-        bitmap.recycle()
-
-        return "data:image/jpeg;base64,$base64String"
     }
 
-    private fun createAndSaveRecipe(title: String, description: String, imageUrl: String?, ownerId: String) {
+    private fun createAndSaveRecipe(title: String, description: String, imageUrl: String?, ownerId: String, recipeId: String) {
         val recipe = Recipe(
-            id = existingRecipe?.id ?: UUID.randomUUID().toString(),
+            id = recipeId,
             title = title,
             description = description,
             imageUrl = imageUrl,
@@ -257,8 +272,8 @@ class AddRecipeFragment : Fragment() {
         val callback: (Boolean) -> Unit = { success ->
             activity?.runOnUiThread {
                 if (_binding == null) return@runOnUiThread
-                binding.progressBar.visibility = View.GONE
-                binding.btnSave.isEnabled = true
+                binding.fragmentAddRecipeProgressBar.hide()
+                binding.fragmentAddRecipeButtonSave.isEnabled = true
                 if (success) {
                     Toast.makeText(requireContext(), "Recipe saved!", Toast.LENGTH_SHORT).show()
                     findNavController().popBackStack()

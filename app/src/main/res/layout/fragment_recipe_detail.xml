@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.recipe.RecipeDetailFragment">
+    tools:context=".features.recipe.RecipeDetailFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <ImageView
-            android:id="@+id/ivRecipeImage"
+            android:id="@+id/fragment_recipe_detail_image_view"
             android:layout_width="0dp"
             android:layout_height="250dp"
             android:contentDescription="Recipe Image"
@@ -21,7 +21,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/tvTitle"
+            android:id="@+id/fragment_recipe_detail_text_view_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
@@ -29,11 +29,11 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ivRecipeImage"
+            app:layout_constraintTop_toBottomOf="@id/fragment_recipe_detail_image_view"
             tools:text="Recipe Title" />
 
         <TextView
-            android:id="@+id/tvDescription"
+            android:id="@+id/fragment_recipe_detail_text_view_description"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
@@ -41,11 +41,11 @@
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvTitle"
+            app:layout_constraintTop_toBottomOf="@id/fragment_recipe_detail_text_view_title"
             tools:text="Recipe description goes here..." />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnEdit"
+            android:id="@+id/fragment_recipe_detail_button_edit"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -53,10 +53,10 @@
             android:text="Edit"
             android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvDescription" />
+            app:layout_constraintTop_toBottomOf="@id/fragment_recipe_detail_text_view_description" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnDelete"
+            android:id="@+id/fragment_recipe_detail_button_delete"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -64,10 +64,10 @@
             android:text="Delete"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvDescription" />
+            app:layout_constraintTop_toBottomOf="@id/fragment_recipe_detail_text_view_description" />
 
         <ProgressBar
-            android:id="@+id/progressBar"
+            android:id="@+id/fragment_recipe_detail_progress_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"

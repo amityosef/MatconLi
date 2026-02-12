@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    tools:context=".ui.profile.EditProfileFragment">
+    tools:context=".features.profile.EditProfileFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -13,7 +13,7 @@
         android:padding="24dp">
 
         <ImageView
-            android:id="@+id/ivProfileImage"
+            android:id="@+id/fragment_edit_profile_image_view"
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:layout_marginTop="16dp"
@@ -25,17 +25,17 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnChangeImage"
+            android:id="@+id/fragment_edit_profile_button_change_image"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Change Photo"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ivProfileImage" />
+            app:layout_constraintTop_toBottomOf="@id/fragment_edit_profile_image_view" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilName"
+            android:id="@+id/fragment_edit_profile_text_input_layout_name"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -43,10 +43,10 @@
             android:hint="Name"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btnChangeImage">
+            app:layout_constraintTop_toBottomOf="@id/fragment_edit_profile_button_change_image">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etName"
+                android:id="@+id/fragment_edit_profile_edit_text_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName" />
@@ -54,7 +54,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilAvatarUrl"
+            android:id="@+id/fragment_edit_profile_text_input_layout_avatar_url"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -62,10 +62,10 @@
             android:hint="Avatar URL"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tilName">
+            app:layout_constraintTop_toBottomOf="@id/fragment_edit_profile_text_input_layout_name">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etAvatarUrl"
+                android:id="@+id/fragment_edit_profile_edit_text_avatar_url"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textUri" />
@@ -73,7 +73,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
-            android:id="@+id/tvEmail"
+            android:id="@+id/fragment_edit_profile_text_view_email"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -81,21 +81,21 @@
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tilAvatarUrl"
+            app:layout_constraintTop_toBottomOf="@id/fragment_edit_profile_text_input_layout_avatar_url"
             tools:text="Email: john@example.com" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSave"
+            android:id="@+id/fragment_edit_profile_button_save"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:text="Save Changes"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvEmail" />
+            app:layout_constraintTop_toBottomOf="@id/fragment_edit_profile_text_view_email" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnCancel"
+            android:id="@+id/fragment_edit_profile_button_cancel"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -103,10 +103,10 @@
             android:text="Cancel"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btnSave" />
+            app:layout_constraintTop_toBottomOf="@id/fragment_edit_profile_button_save" />
 
         <ProgressBar
-            android:id="@+id/progressBar"
+            android:id="@+id/fragment_edit_profile_progress_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"

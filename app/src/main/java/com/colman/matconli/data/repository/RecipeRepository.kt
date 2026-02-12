@@ -3,24 +3,13 @@ package com.colman.matconli.data.repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.colman.matconli.dao.AppLocalDB
+import com.colman.matconli.data.models.FirebaseModel
 import com.colman.matconli.model.Recipe
-import com.google.firebase.firestore.firestoreSettings
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.memoryCacheSettings
-import com.google.firebase.ktx.Firebase
 import java.util.concurrent.Executors
 
 object RecipeRepository {
 
-    private val db = Firebase.firestore.apply {
-        firestoreSettings = firestoreSettings {
-            setLocalCacheSettings(
-                memoryCacheSettings { }
-            )
-        }
-    }
-
-    private val recipesCollection = db.collection("recipes")
+    private val firebaseModel = FirebaseModel()
     private val recipeDao by lazy { AppLocalDB.db.recipeDao() }
     private val executor = Executors.newSingleThreadExecutor()
 
@@ -29,33 +18,25 @@ object RecipeRepository {
     fun refreshAllRecipes(): LiveData<Boolean> {
         val result = MutableLiveData<Boolean>()
 
-        recipesCollection
-            .get()
-            .addOnSuccessListener { snapshot ->
-                executor.execute {
-                    var latestUpdate = 0L
-                    val recipesList = mutableListOf<Recipe>()
+        firebaseModel.getAllRecipes(Recipe.Companion.lastUpdated) { recipesList ->
+            executor.execute {
+                var latestUpdate = 0L
 
-                    for (doc in snapshot.documents) {
-                        val recipe = Recipe.Companion.fromJson(doc.data ?: continue)
-                        recipesList.add(recipe)
-                        recipe.lastUpdated?.let {
-                            if (it > latestUpdate) latestUpdate = it
-                        }
+                for (recipe in recipesList) {
+                    recipe.lastUpdated?.let {
+                        if (it > latestUpdate) latestUpdate = it
                     }
-
-                    if (recipesList.isNotEmpty()) {
-                        recipeDao.insertAll(recipesList)
-                        if (latestUpdate > Recipe.Companion.lastUpdated) {
-                            Recipe.Companion.lastUpdated = latestUpdate
-                        }
-                    }
-                    result.postValue(true)
                 }
+
+                if (recipesList.isNotEmpty()) {
+                    recipeDao.insertAll(recipesList)
+                    if (latestUpdate > Recipe.Companion.lastUpdated) {
+                        Recipe.Companion.lastUpdated = latestUpdate
+                    }
+                }
+                result.postValue(true)
             }
-            .addOnFailureListener {
-                result.postValue(false)
-            }
+        }
 
         return result
     }
@@ -68,44 +49,29 @@ object RecipeRepository {
     }
 
     fun addRecipe(recipe: Recipe, callback: (Boolean) -> Unit) {
-        recipesCollection.document(recipe.id)
-            .set(recipe.toJson)
-            .addOnSuccessListener {
-                executor.execute {
-                    recipeDao.insert(recipe.copy(lastUpdated = System.currentTimeMillis()))
-                    callback(true)
-                }
+        firebaseModel.saveRecipe(recipe) {
+            executor.execute {
+                recipeDao.insert(recipe.copy(lastUpdated = System.currentTimeMillis()))
+                callback(true)
             }
-            .addOnFailureListener {
-                callback(false)
-            }
+        }
     }
 
     fun updateRecipe(recipe: Recipe, callback: (Boolean) -> Unit) {
-        recipesCollection.document(recipe.id)
-            .set(recipe.toJson)
-            .addOnSuccessListener {
-                executor.execute {
-                    recipeDao.update(recipe.copy(lastUpdated = System.currentTimeMillis()))
-                    callback(true)
-                }
+        firebaseModel.updateRecipe(recipe) {
+            executor.execute {
+                recipeDao.update(recipe.copy(lastUpdated = System.currentTimeMillis()))
+                callback(true)
             }
-            .addOnFailureListener {
-                callback(false)
-            }
+        }
     }
 
     fun deleteRecipe(recipe: Recipe, callback: (Boolean) -> Unit) {
-        recipesCollection.document(recipe.id)
-            .delete()
-            .addOnSuccessListener {
-                executor.execute {
-                    recipeDao.delete(recipe)
-                    callback(true)
-                }
+        firebaseModel.deleteRecipe(recipe) {
+            executor.execute {
+                recipeDao.delete(recipe)
+                callback(true)
             }
-            .addOnFailureListener {
-                callback(false)
-            }
+        }
     }
 }
