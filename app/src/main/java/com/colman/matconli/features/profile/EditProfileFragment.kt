@@ -1,26 +1,62 @@
 package com.colman.matconli.features.profile
 
+import android.Manifest
+import android.app.Activity
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.widget.doAfterTextChanged
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.colman.matconli.base.MainActivity
 import com.colman.matconli.R
 import com.colman.matconli.databinding.FragmentEditProfileBinding
 import com.colman.matconli.data.repository.UserRepository
+import com.colman.matconli.data.models.StorageModel
 import com.colman.matconli.model.User
 import com.colman.matconli.utilis.ImageUtils
 import com.google.firebase.auth.FirebaseAuth
+import java.io.File
 
 class EditProfileFragment : Fragment() {
 
     private var binding: FragmentEditProfileBinding? = null
     private val auth = FirebaseAuth.getInstance()
     private var currentUser: User? = null
+    private var selectedImageUri: Uri? = null
+    private var photoUri: Uri? = null
+
+    private val cameraPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            openCamera()
+        } else {
+            Toast.makeText(requireContext(), "Camera permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val cameraLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            photoUri?.let { uri ->
+                selectedImageUri = uri
+                loadImagePreview(uri.toString())
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,17 +83,40 @@ class EditProfileFragment : Fragment() {
 
         binding?.fragmentEditProfileProgressBar?.visibility = View.VISIBLE
 
-        UserRepository.shared.getUserById(userId) { user ->
-            activity?.runOnUiThread {
-                binding?.fragmentEditProfileProgressBar?.visibility = View.GONE
-                currentUser = user
-                user?.let {
-                    binding?.fragmentEditProfileEditTextName?.setText(it.name)
-                    binding?.fragmentEditProfileTextViewEmail?.text = "Email: ${it.email}"
-                    ImageUtils.loadImage(binding?.fragmentEditProfileImageView!!, it.avatarUrl, R.drawable.ic_profile_placeholder)
-                }
+        UserRepository.shared.getUserByIdLiveData(userId).observe(viewLifecycleOwner) { user ->
+            binding?.fragmentEditProfileProgressBar?.visibility = View.GONE
+            currentUser = user
+            user?.let {
+                binding?.fragmentEditProfileEditTextName?.setText(it.name)
+                binding?.fragmentEditProfileTextViewEmail?.text = "Email: ${it.email}"
+                loadImagePreview(it.avatarUrl)
             }
         }
+    }
+
+    private fun loadImagePreview(url: String?) {
+        binding?.fragmentEditProfileImageView?.let {
+            ImageUtils.loadImage(it, url, R.drawable.ic_profile_placeholder)
+        }
+    }
+
+    private fun openCamera() {
+        val photoFile = File.createTempFile(
+            "profile_${System.currentTimeMillis()}",
+            ".jpg",
+            requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        )
+
+        photoUri = FileProvider.getUriForFile(
+            requireContext(),
+            "${requireContext().packageName}.fileprovider",
+            photoFile
+        )
+
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+            putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+        }
+        cameraLauncher.launch(intent)
     }
 
     private fun setupClickListeners() {
@@ -68,6 +127,18 @@ class EditProfileFragment : Fragment() {
 
             binding.fragmentEditProfileButtonCancel.setOnClickListener {
                 findNavController().popBackStack()
+            }
+
+            binding.fragmentEditProfileButtonCamera.setOnClickListener {
+                if (ContextCompat.checkSelfPermission(
+                        requireContext(),
+                        Manifest.permission.CAMERA
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    openCamera()
+                } else {
+                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                }
             }
         }
     }
@@ -93,24 +164,49 @@ class EditProfileFragment : Fragment() {
 
         val updatedUser = user.copy(name = name)
 
-        UserRepository.shared.updateUser(
-            storageAPI = com.colman.matconli.data.models.StorageModel.StorageAPI.CLOUDINARY,
-            image = null,
-            user = updatedUser
-        ) { success ->
-            activity?.runOnUiThread {
-                binding?.fragmentEditProfileProgressBar?.visibility = View.GONE
-                binding?.fragmentEditProfileButtonSave?.isEnabled = true
-                binding?.fragmentEditProfileButtonCancel?.isEnabled = true
+        try {
+            val bitmap = selectedImageUri?.let { getBitmapFromUri(it) }
 
-                if (success) {
-                    Toast.makeText(requireContext(), "Profile updated", Toast.LENGTH_SHORT).show()
-                    (activity as? MainActivity)?.loadUserProfile()
-                    findNavController().popBackStack()
-                } else {
-                    Toast.makeText(requireContext(), "Failed to update profile", Toast.LENGTH_SHORT).show()
+            UserRepository.shared.updateUser(
+                storageAPI = StorageModel.StorageAPI.CLOUDINARY,
+                image = bitmap,
+                user = updatedUser
+            ) { success ->
+                activity?.runOnUiThread {
+                    binding?.fragmentEditProfileProgressBar?.visibility = View.GONE
+                    binding?.fragmentEditProfileButtonSave?.isEnabled = true
+                    binding?.fragmentEditProfileButtonCancel?.isEnabled = true
+
+                    if (success) {
+                        Toast.makeText(requireContext(), "Profile updated", Toast.LENGTH_SHORT).show()
+                        (activity as? MainActivity)?.loadUserProfile()
+                        findNavController().popBackStack()
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to update profile", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
+        } catch (e: Exception) {
+            binding?.fragmentEditProfileProgressBar?.visibility = View.GONE
+            binding?.fragmentEditProfileButtonSave?.isEnabled = true
+            binding?.fragmentEditProfileButtonCancel?.isEnabled = true
+            Toast.makeText(requireContext(), "Failed to process image", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun getBitmapFromUri(uri: Uri): Bitmap {
+        val inputStream = requireContext().contentResolver.openInputStream(uri)
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        inputStream?.close()
+
+        val maxSize = 800
+        return if (bitmap.width > maxSize || bitmap.height > maxSize) {
+            val scale = maxSize.toFloat() / Math.max(bitmap.width, bitmap.height)
+            val newWidth = (bitmap.width * scale).toInt()
+            val newHeight = (bitmap.height * scale).toInt()
+            Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+        } else {
+            bitmap
         }
     }
 
