@@ -15,7 +15,7 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.firebase.auth.FirebaseAuth
 import com.colman.matconli.data.repository.UserRepository
 import com.colman.matconli.model.User
-import com.colman.matconli.utilis.ImageUtils
+import com.squareup.picasso.Picasso
 
 class MainActivity : AppCompatActivity() {
 
@@ -60,7 +60,15 @@ class MainActivity : AppCompatActivity() {
                 val liveData = UserRepository.shared.getUserById(userId)
                 val observer = Observer<User?> { user ->
                     user?.let {
-                        ImageUtils.loadImage(imageView, it.avatarUrl, R.drawable.ic_profile_placeholder)
+                        if (!it.avatarUrl.isNullOrBlank()) {
+                            Picasso.get()
+                                .load(it.avatarUrl)
+                                .placeholder(R.drawable.ic_profile_placeholder)
+                                .error(R.drawable.ic_profile_placeholder)
+                                .into(imageView)
+                        } else {
+                            imageView.setImageResource(R.drawable.ic_profile_placeholder)
+                        }
                     } ?: run {
                         imageView.setImageResource(R.drawable.ic_profile_placeholder)
                     }

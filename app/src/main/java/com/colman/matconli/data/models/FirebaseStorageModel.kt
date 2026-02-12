@@ -12,11 +12,15 @@ class FirebaseStorageModel {
     private val storage = Firebase.storage
 
     fun uploadRecipeImage(image: Bitmap, recipe: Recipe, completion: (String?) -> Unit) {
-
         val storageRef = storage.reference
         val imagesRecipeRef = storageRef.child("images/recipes/${recipe.id}/image.jpg")
-
         uploadImage(image, imagesRecipeRef, completion)
+    }
+
+    fun uploadUserImage(image: Bitmap, userId: String, completion: (String?) -> Unit) {
+        val storageRef = storage.reference
+        val imagesUserRef = storageRef.child("images/users/${userId}/avatar.jpg")
+        uploadImage(image, imagesUserRef, completion)
     }
 
     private fun uploadImage(image: Bitmap, ref: StorageReference, completion: (String?) -> Unit) {
@@ -24,10 +28,10 @@ class FirebaseStorageModel {
         image.compress(Bitmap.CompressFormat.JPEG, 100, baos)
         val data = baos.toByteArray()
 
-        var uploadTask = ref.putBytes(data)
+        val uploadTask = ref.putBytes(data)
         uploadTask.addOnFailureListener {
             completion(null)
-        }.addOnSuccessListener { taskSnapshot ->
+        }.addOnSuccessListener {
             ref.downloadUrl.addOnSuccessListener { uri ->
                 completion(uri.toString())
             }.addOnFailureListener {

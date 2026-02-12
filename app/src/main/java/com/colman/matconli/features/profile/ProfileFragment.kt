@@ -9,11 +9,11 @@ import androidx.navigation.fragment.findNavController
 import com.colman.matconli.base.MainActivity
 import com.colman.matconli.R
 import com.colman.matconli.databinding.FragmentProfileBinding
-import com.colman.matconli.utilis.ImageUtils
 import com.colman.matconli.base.BaseFragment
 import com.colman.matconli.utilis.hide
 import com.colman.matconli.utilis.show
 import com.colman.matconli.utilis.toggleVisibility
+import com.squareup.picasso.Picasso
 
 class ProfileFragment : BaseFragment() {
 
@@ -44,7 +44,15 @@ class ProfileFragment : BaseFragment() {
                 if (user != null) {
                     binding.fragmentProfileTextViewName.text = user.name
                     binding.fragmentProfileTextViewEmail.text = user.email
-                    ImageUtils.loadImage(binding.fragmentProfileImageView, user.avatarUrl, R.drawable.ic_profile_placeholder)
+                    if (!user.avatarUrl.isNullOrBlank()) {
+                        Picasso.get()
+                            .load(user.avatarUrl)
+                            .placeholder(R.drawable.ic_profile_placeholder)
+                            .error(R.drawable.ic_profile_placeholder)
+                            .into(binding.fragmentProfileImageView)
+                    } else {
+                        binding.fragmentProfileImageView.setImageResource(R.drawable.ic_profile_placeholder)
+                    }
                 } else {
                     binding.fragmentProfileTextViewName.text = ""
                     binding.fragmentProfileTextViewEmail.text = ""

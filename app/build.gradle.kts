@@ -60,6 +60,7 @@ dependencies {
 
 
     implementation(libs.picasso)
+    implementation(libs.cloudinary)
 
     implementation(libs.navigation.fragment.ktx)
     implementation(libs.navigation.ui.ktx)

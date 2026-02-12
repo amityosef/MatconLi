@@ -12,27 +12,34 @@
         android:layout_height="wrap_content"
         android:padding="24dp">
 
-        <ImageView
-            android:id="@+id/fragment_edit_profile_image_view"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:layout_marginTop="16dp"
-            android:contentDescription="Profile Image"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_profile_placeholder"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/fragment_edit_profile_button_change_image"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+        <FrameLayout
+            android:id="@+id/fragment_edit_profile_avatar_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Change Photo"
+            android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_edit_profile_image_view" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/fragment_edit_profile_image_view"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:contentDescription="Profile Image"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_profile_placeholder" />
+
+            <ImageButton
+                android:id="@+id/fragment_edit_profile_button_camera"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_gravity="bottom|end"
+                android:background="@drawable/circle_background"
+                android:contentDescription="Take Photo"
+                android:src="@android:drawable/ic_menu_camera"
+                android:padding="6dp" />
+
+        </FrameLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/fragment_edit_profile_text_input_layout_name"
@@ -43,32 +50,13 @@
             android:hint="Name"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_edit_profile_button_change_image">
+            app:layout_constraintTop_toBottomOf="@id/fragment_edit_profile_avatar_container">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/fragment_edit_profile_edit_text_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/fragment_edit_profile_text_input_layout_avatar_url"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="Avatar URL"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_edit_profile_text_input_layout_name">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/fragment_edit_profile_edit_text_avatar_url"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textUri" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -81,7 +69,7 @@
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_edit_profile_text_input_layout_avatar_url"
+            app:layout_constraintTop_toBottomOf="@id/fragment_edit_profile_text_input_layout_name"
             tools:text="Email: john@example.com" />
 
         <com.google.android.material.button.MaterialButton

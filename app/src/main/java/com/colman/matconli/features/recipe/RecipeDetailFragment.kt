@@ -11,10 +11,10 @@ import com.colman.matconli.R
 import com.colman.matconli.databinding.FragmentRecipeDetailBinding
 import com.colman.matconli.model.Recipe
 import com.colman.matconli.data.repository.RecipeRepository
-import com.colman.matconli.utilis.ImageUtils
 import com.colman.matconli.utilis.hide
 import com.colman.matconli.utilis.show
 import com.colman.matconli.base.BaseFragment
+import com.squareup.picasso.Picasso
 
 class RecipeDetailFragment : BaseFragment() {
 
@@ -56,8 +56,16 @@ class RecipeDetailFragment : BaseFragment() {
     private fun displayRecipe(recipe: Recipe) {
         binding?.fragmentRecipeDetailTextViewTitle?.text = recipe.title
         binding?.fragmentRecipeDetailTextViewDescription?.text = recipe.description
-        binding?.fragmentRecipeDetailImageView?.let {
-            ImageUtils.loadImage(it, recipe.imageUrl, R.drawable.ic_recipe_placeholder)
+        binding?.fragmentRecipeDetailImageView?.let { imageView ->
+            if (!recipe.imageUrl.isNullOrBlank()) {
+                Picasso.get()
+                    .load(recipe.imageUrl)
+                    .placeholder(R.drawable.ic_recipe_placeholder)
+                    .error(R.drawable.ic_recipe_placeholder)
+                    .into(imageView)
+            } else {
+                imageView.setImageResource(R.drawable.ic_recipe_placeholder)
+            }
         }
 
         val currentUserId = getCurrentUserId()
