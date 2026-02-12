@@ -1,4 +1,4 @@
-package com.colman.matconli.ui.recipe
+package com.colman.matconli.features.feed
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,26 +12,26 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.colman.matconli.base.MainActivity
 import com.colman.matconli.R
-import com.colman.matconli.databinding.FragmentMyRecipesBinding
+import com.colman.matconli.databinding.FragmentFeedBinding
+import com.colman.matconli.data.repository.RecipeRepository
 import com.colman.matconli.model.Recipe
-import com.colman.matconli.model.RecipeRepository
 import com.google.firebase.auth.FirebaseAuth
 
-class MyRecipesFragment : Fragment(), RecipeAdapter.OnItemClickListener {
+class RecipeListFragment : Fragment(), RecipeAdapter.OnItemClickListener {
 
-    private var _binding: FragmentMyRecipesBinding? = null
+    private var _binding: FragmentFeedBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var adapter: RecipeAdapter
-    private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentMyRecipesBinding.inflate(inflater, container, false)
+        _binding = FragmentFeedBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -52,19 +52,22 @@ class MyRecipesFragment : Fragment(), RecipeAdapter.OnItemClickListener {
     private fun setupMenu() {
         requireActivity().addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.menu_my_recipes, menu)
+                menuInflater.inflate(R.menu.menu_feed, menu)
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
-                    R.id.action_main_feed -> {
-                        findNavController().popBackStack()
+                    R.id.action_profile -> {
+                        findNavController().navigate(
+                            RecipeListFragmentDirections.actionFeedFragmentToProfileFragment()
+                        )
                         true
                     }
                     R.id.action_logout -> {
+                        (activity as? MainActivity)?.clearUserProfile()
                         FirebaseAuth.getInstance().signOut()
                         findNavController().navigate(
-                            MyRecipesFragmentDirections.actionMyRecipesFragmentToLoginFragment()
+                            RecipeListFragmentDirections.actionFeedFragmentToLoginFragment()
                         )
                         true
                     }
@@ -81,9 +84,10 @@ class MyRecipesFragment : Fragment(), RecipeAdapter.OnItemClickListener {
     }
 
     private fun setupClickListeners() {
+        binding.fabAddRecipe.visibility = View.VISIBLE
         binding.fabAddRecipe.setOnClickListener {
             findNavController().navigate(
-                MyRecipesFragmentDirections.actionMyRecipesFragmentToAddRecipeFragment(null)
+                RecipeListFragmentDirections.actionFeedFragmentToAddRecipeFragment(null)
             )
         }
 
@@ -92,12 +96,18 @@ class MyRecipesFragment : Fragment(), RecipeAdapter.OnItemClickListener {
         }
     }
 
+    private var hasLoadedInitial = false
+
     private fun observeRecipes() {
         RecipeRepository.recipes.observe(viewLifecycleOwner) { recipes ->
-            val myRecipes = recipes.filter { it.ownerId == currentUserId }
-            adapter.updateRecipes(myRecipes)
-            binding.tvEmpty.visibility = if (myRecipes.isEmpty()) View.VISIBLE else View.GONE
-            binding.rvRecipes.visibility = if (myRecipes.isEmpty()) View.GONE else View.VISIBLE
+            adapter.updateRecipes(recipes)
+            binding.tvEmpty.visibility = if (recipes.isEmpty()) View.VISIBLE else View.GONE
+            binding.rvRecipes.visibility = if (recipes.isEmpty()) View.GONE else View.VISIBLE
+
+            if (!hasLoadedInitial && recipes.isEmpty()) {
+                hasLoadedInitial = true
+                refreshData()
+            }
         }
     }
 
@@ -111,7 +121,7 @@ class MyRecipesFragment : Fragment(), RecipeAdapter.OnItemClickListener {
 
     override fun onItemClick(recipe: Recipe) {
         findNavController().navigate(
-            MyRecipesFragmentDirections.actionMyRecipesFragmentToRecipeDetailFragment(recipe.id)
+            RecipeListFragmentDirections.actionFeedFragmentToRecipeDetailFragment(recipe.id)
         )
     }
 

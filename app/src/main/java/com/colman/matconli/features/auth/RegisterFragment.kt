@@ -1,4 +1,4 @@
-package com.colman.matconli.ui.auth
+package com.colman.matconli.features.auth
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,11 +8,12 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.colman.matconli.databinding.FragmentLoginBinding
+import com.colman.matconli.base.MainActivity
+import com.colman.matconli.databinding.FragmentRegisterBinding
 
-class LoginFragment : Fragment() {
+class RegisterFragment : Fragment() {
 
-    private var _binding: FragmentLoginBinding? = null
+    private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
 
     private val viewModel: AuthViewModel by viewModels()
@@ -22,32 +23,29 @@ class LoginFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentLoginBinding.inflate(inflater, container, false)
+        _binding = FragmentRegisterBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (viewModel.isLoggedIn()) {
-            navigateToFeed()
-            return
-        }
-
         setupClickListeners()
         observeAuthState()
     }
 
     private fun setupClickListeners() {
-        binding.btnLogin.setOnClickListener {
+        binding.btnRegister.setOnClickListener {
+            val name = binding.etName.text.toString().trim()
             val email = binding.etEmail.text.toString().trim()
             val password = binding.etPassword.text.toString()
-            viewModel.login(email, password)
+            val confirmPassword = binding.etConfirmPassword.text.toString()
+            viewModel.register(name, email, password, confirmPassword)
         }
 
-        binding.tvRegister.setOnClickListener {
+        binding.tvLogin.setOnClickListener {
             findNavController().navigate(
-                LoginFragmentDirections.actionLoginFragmentToRegisterFragment()
+                RegisterFragmentDirections.actionRegisterFragmentToLoginFragment()
             )
         }
     }
@@ -57,20 +55,21 @@ class LoginFragment : Fragment() {
             when (state) {
                 is AuthViewModel.AuthState.Loading -> {
                     binding.progressBar.visibility = View.VISIBLE
-                    binding.btnLogin.isEnabled = false
+                    binding.btnRegister.isEnabled = false
                 }
                 is AuthViewModel.AuthState.Success -> {
                     binding.progressBar.visibility = View.GONE
+                    (activity as? MainActivity)?.loadUserProfile()
                     navigateToFeed()
                 }
                 is AuthViewModel.AuthState.Error -> {
                     binding.progressBar.visibility = View.GONE
-                    binding.btnLogin.isEnabled = true
+                    binding.btnRegister.isEnabled = true
                     Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
                 }
                 is AuthViewModel.AuthState.Idle -> {
                     binding.progressBar.visibility = View.GONE
-                    binding.btnLogin.isEnabled = true
+                    binding.btnRegister.isEnabled = true
                 }
             }
         }
@@ -78,7 +77,7 @@ class LoginFragment : Fragment() {
 
     private fun navigateToFeed() {
         findNavController().navigate(
-            LoginFragmentDirections.actionLoginFragmentToFeedFragment()
+            RegisterFragmentDirections.actionRegisterFragmentToFeedFragment()
         )
     }
 
@@ -87,5 +86,4 @@ class LoginFragment : Fragment() {
         _binding = null
     }
 }
-
 

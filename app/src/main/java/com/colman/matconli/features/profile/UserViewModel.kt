@@ -1,12 +1,12 @@
-package com.colman.matconli.ui.profile
+package com.colman.matconli.features.profile
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.colman.matconli.data.repository.UserRepository
 import com.colman.matconli.model.User
-import com.colman.matconli.model.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,24 +26,43 @@ class UserViewModel : ViewModel() {
     val updateResult: LiveData<Boolean?> = _updateResult
 
     private var userSource: LiveData<User?>? = null
+    private var isActive = true
+
+    override fun onCleared() {
+        super.onCleared()
+        isActive = false
+        userSource?.let { _currentUser.removeSource(it) }
+        userSource = null
+    }
 
     fun loadCurrentUser() {
-        val userId = auth.currentUser?.uid ?: return
-        _isLoading.value = true
+        val userId = auth.currentUser?.uid
+        if (userId == null) {
+            _isLoading.postValue(false)
+            _currentUser.postValue(null)
+            return
+        }
+
+        _isLoading.postValue(true)
 
         UserRepository.ensureUserExists(userId) { success ->
-            if (success) {
-                userSource?.let { _currentUser.removeSource(it) }
+            if (isActive) {
+                if (success) {
+                    userSource?.let { _currentUser.removeSource(it) }
 
-                val source = UserRepository.getUserById(userId)
-                userSource = source
+                    val source = UserRepository.getUserById(userId)
+                    userSource = source
 
-                _currentUser.addSource(source) { user ->
-                    _currentUser.value = user
-                    _isLoading.value = false
+                    _currentUser.addSource(source) { user ->
+                        if (isActive) {
+                            _currentUser.postValue(user)
+                            _isLoading.postValue(false)
+                        }
+                    }
+                } else {
+                    _isLoading.postValue(false)
+                    _currentUser.postValue(null)
                 }
-            } else {
-                _isLoading.value = false
             }
         }
     }

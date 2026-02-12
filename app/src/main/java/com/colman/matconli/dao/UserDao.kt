@@ -1,4 +1,4 @@
-package com.colman.matconli.model.dao
+package com.colman.matconli.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao

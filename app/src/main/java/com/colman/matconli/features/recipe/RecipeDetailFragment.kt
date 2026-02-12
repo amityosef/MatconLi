@@ -1,4 +1,4 @@
-package com.colman.matconli.ui.recipe
+package com.colman.matconli.features.recipe
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,8 +11,8 @@ import androidx.navigation.fragment.navArgs
 import com.colman.matconli.R
 import com.colman.matconli.databinding.FragmentRecipeDetailBinding
 import com.colman.matconli.model.Recipe
-import com.colman.matconli.model.RecipeRepository
-import com.colman.matconli.util.ImageUtils
+import com.colman.matconli.data.repository.RecipeRepository
+import com.colman.matconli.utilis.ImageUtils
 import com.google.firebase.auth.FirebaseAuth
 
 class RecipeDetailFragment : Fragment() {

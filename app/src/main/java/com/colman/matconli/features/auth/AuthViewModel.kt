@@ -1,10 +1,10 @@
-package com.colman.matconli.ui.auth
+package com.colman.matconli.features.auth
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.colman.matconli.data.repository.UserRepository
 import com.colman.matconli.model.User
-import com.colman.matconli.model.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 

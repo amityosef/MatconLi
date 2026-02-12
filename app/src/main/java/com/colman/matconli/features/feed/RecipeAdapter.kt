@@ -1,4 +1,4 @@
-package com.colman.matconli.ui.recipe
+package com.colman.matconli.features.feed
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.colman.matconli.R
 import com.colman.matconli.databinding.ItemRecipeBinding
 import com.colman.matconli.model.Recipe
-import com.colman.matconli.util.ImageUtils
+import com.colman.matconli.utilis.ImageUtils
 
 class RecipeAdapter(
     private var recipes: MutableList<Recipe> = mutableListOf(),

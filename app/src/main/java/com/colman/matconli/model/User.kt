@@ -68,4 +68,3 @@ data class User(
             LAST_UPDATED_KEY to FieldValue.serverTimestamp()
         )
 }
-

@@ -73,4 +73,3 @@ data class Recipe(
             LAST_UPDATED_KEY to FieldValue.serverTimestamp()
         )
 }
-

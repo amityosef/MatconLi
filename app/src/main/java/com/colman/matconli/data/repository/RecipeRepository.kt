@@ -1,9 +1,12 @@
-package com.colman.matconli.model
+package com.colman.matconli.data.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.colman.matconli.dao.AppLocalDB
+import com.colman.matconli.model.Recipe
 import com.google.firebase.firestore.firestoreSettings
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.memoryCacheSettings
 import com.google.firebase.ktx.Firebase
 import java.util.concurrent.Executors
 
@@ -12,7 +15,7 @@ object RecipeRepository {
     private val db = Firebase.firestore.apply {
         firestoreSettings = firestoreSettings {
             setLocalCacheSettings(
-                com.google.firebase.firestore.memoryCacheSettings { }
+                memoryCacheSettings { }
             )
         }
     }
@@ -34,7 +37,7 @@ object RecipeRepository {
                     val recipesList = mutableListOf<Recipe>()
 
                     for (doc in snapshot.documents) {
-                        val recipe = Recipe.fromJson(doc.data ?: continue)
+                        val recipe = Recipe.Companion.fromJson(doc.data ?: continue)
                         recipesList.add(recipe)
                         recipe.lastUpdated?.let {
                             if (it > latestUpdate) latestUpdate = it
@@ -43,8 +46,8 @@ object RecipeRepository {
 
                     if (recipesList.isNotEmpty()) {
                         recipeDao.insertAll(recipesList)
-                        if (latestUpdate > Recipe.lastUpdated) {
-                            Recipe.lastUpdated = latestUpdate
+                        if (latestUpdate > Recipe.Companion.lastUpdated) {
+                            Recipe.Companion.lastUpdated = latestUpdate
                         }
                     }
                     result.postValue(true)
@@ -106,4 +109,3 @@ object RecipeRepository {
             }
     }
 }
-

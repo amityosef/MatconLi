@@ -1,4 +1,4 @@
-package com.colman.matconli.util
+package com.colman.matconli.utilis
 
 import android.graphics.BitmapFactory
 import android.util.Base64

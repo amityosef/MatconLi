@@ -1,4 +1,4 @@
-package com.colman.matconli.ui.recipe
+package com.colman.matconli.features.recipe
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,24 +13,26 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.colman.matconli.R
-import com.colman.matconli.databinding.FragmentFeedBinding
+import com.colman.matconli.databinding.FragmentMyRecipesBinding
+import com.colman.matconli.features.feed.RecipeAdapter
 import com.colman.matconli.model.Recipe
-import com.colman.matconli.model.RecipeRepository
+import com.colman.matconli.data.repository.RecipeRepository
 import com.google.firebase.auth.FirebaseAuth
 
-class FeedFragment : Fragment(), RecipeAdapter.OnItemClickListener {
+class MyRecipesFragment : Fragment(), RecipeAdapter.OnItemClickListener {
 
-    private var _binding: FragmentFeedBinding? = null
+    private var _binding: FragmentMyRecipesBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var adapter: RecipeAdapter
+    private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentFeedBinding.inflate(inflater, container, false)
+        _binding = FragmentMyRecipesBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -51,27 +53,19 @@ class FeedFragment : Fragment(), RecipeAdapter.OnItemClickListener {
     private fun setupMenu() {
         requireActivity().addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.menu_feed, menu)
+                menuInflater.inflate(R.menu.menu_my_recipes, menu)
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
-                    R.id.action_my_recipes -> {
-                        findNavController().navigate(
-                            FeedFragmentDirections.actionFeedFragmentToMyRecipesFragment()
-                        )
-                        true
-                    }
-                    R.id.action_profile -> {
-                        findNavController().navigate(
-                            FeedFragmentDirections.actionFeedFragmentToProfileFragment()
-                        )
+                    R.id.action_main_feed -> {
+                        findNavController().popBackStack()
                         true
                     }
                     R.id.action_logout -> {
                         FirebaseAuth.getInstance().signOut()
                         findNavController().navigate(
-                            FeedFragmentDirections.actionFeedFragmentToLoginFragment()
+                            MyRecipesFragmentDirections.actionMyRecipesFragmentToLoginFragment()
                         )
                         true
                     }
@@ -90,7 +84,7 @@ class FeedFragment : Fragment(), RecipeAdapter.OnItemClickListener {
     private fun setupClickListeners() {
         binding.fabAddRecipe.setOnClickListener {
             findNavController().navigate(
-                FeedFragmentDirections.actionFeedFragmentToAddRecipeFragment(null)
+                MyRecipesFragmentDirections.actionMyRecipesFragmentToAddRecipeFragment(null)
             )
         }
 
@@ -99,18 +93,12 @@ class FeedFragment : Fragment(), RecipeAdapter.OnItemClickListener {
         }
     }
 
-    private var hasLoadedInitial = false
-
     private fun observeRecipes() {
         RecipeRepository.recipes.observe(viewLifecycleOwner) { recipes ->
-            adapter.updateRecipes(recipes)
-            binding.tvEmpty.visibility = if (recipes.isEmpty()) View.VISIBLE else View.GONE
-            binding.rvRecipes.visibility = if (recipes.isEmpty()) View.GONE else View.VISIBLE
-
-            if (!hasLoadedInitial && recipes.isEmpty()) {
-                hasLoadedInitial = true
-                refreshData()
-            }
+            val myRecipes = recipes.filter { it.ownerId == currentUserId }
+            adapter.updateRecipes(myRecipes)
+            binding.tvEmpty.visibility = if (myRecipes.isEmpty()) View.VISIBLE else View.GONE
+            binding.rvRecipes.visibility = if (myRecipes.isEmpty()) View.GONE else View.VISIBLE
         }
     }
 
@@ -124,7 +112,7 @@ class FeedFragment : Fragment(), RecipeAdapter.OnItemClickListener {
 
     override fun onItemClick(recipe: Recipe) {
         findNavController().navigate(
-            FeedFragmentDirections.actionFeedFragmentToRecipeDetailFragment(recipe.id)
+            MyRecipesFragmentDirections.actionMyRecipesFragmentToRecipeDetailFragment(recipe.id)
         )
     }
 
@@ -133,5 +121,4 @@ class FeedFragment : Fragment(), RecipeAdapter.OnItemClickListener {
         _binding = null
     }
 }
-
 
