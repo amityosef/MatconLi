@@ -23,8 +23,7 @@ import com.colman.matconli.utilis.toggleVisibility
 
 class RecipeListFragment : BaseFragment(), RecipeAdapter.OnItemClickListener {
 
-    private var _binding: FragmentFeedBinding? = null
-    private val binding get() = _binding!!
+    var binding: FragmentFeedBinding? = null
 
     private lateinit var adapter: RecipeAdapter
 
@@ -32,9 +31,9 @@ class RecipeListFragment : BaseFragment(), RecipeAdapter.OnItemClickListener {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentFeedBinding.inflate(inflater, container, false)
-        return binding.root
+    ): View? {
+        binding = FragmentFeedBinding.inflate(inflater, container, false)
+        return binding?.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -82,20 +81,21 @@ class RecipeListFragment : BaseFragment(), RecipeAdapter.OnItemClickListener {
     }
 
     private fun setupRecyclerView() {
-        adapter = RecipeAdapter(listener = this)
-        binding.fragmentFeedRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.fragmentFeedRecyclerView.adapter = adapter
+        adapter = RecipeAdapter()
+        adapter.listener = this
+        binding?.fragmentFeedRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+        binding?.fragmentFeedRecyclerView?.adapter = adapter
     }
 
     private fun setupClickListeners() {
-        binding.fragmentFeedFloatingActionButton.visibility = View.VISIBLE
-        binding.fragmentFeedFloatingActionButton.setOnClickListener {
+        binding?.fragmentFeedFloatingActionButton?.visibility = View.VISIBLE
+        binding?.fragmentFeedFloatingActionButton?.setOnClickListener {
             findNavController().navigate(
                 RecipeListFragmentDirections.actionFeedFragmentToAddRecipeFragment(null)
             )
         }
 
-        binding.fragmentFeedSwipeRefreshLayout.setOnRefreshListener {
+        binding?.fragmentFeedSwipeRefreshLayout?.setOnRefreshListener {
             refreshData()
         }
     }
@@ -103,10 +103,10 @@ class RecipeListFragment : BaseFragment(), RecipeAdapter.OnItemClickListener {
     private var hasLoadedInitial = false
 
     private fun observeRecipes() {
-        RecipeRepository.recipes.observe(viewLifecycleOwner) { recipes ->
+        RecipeRepository.shared.recipes.observe(viewLifecycleOwner) { recipes ->
             adapter.updateRecipes(recipes)
-            binding.fragmentFeedTextViewEmpty.visibility = if (recipes.isEmpty()) View.VISIBLE else View.GONE
-            binding.fragmentFeedRecyclerView.visibility = if (recipes.isEmpty()) View.GONE else View.VISIBLE
+            binding?.fragmentFeedTextViewEmpty?.visibility = if (recipes.isEmpty()) View.VISIBLE else View.GONE
+            binding?.fragmentFeedRecyclerView?.visibility = if (recipes.isEmpty()) View.GONE else View.VISIBLE
 
             if (!hasLoadedInitial && recipes.isEmpty()) {
                 hasLoadedInitial = true
@@ -116,10 +116,10 @@ class RecipeListFragment : BaseFragment(), RecipeAdapter.OnItemClickListener {
     }
 
     private fun refreshData() {
-        binding.fragmentFeedProgressBar.show()
-        RecipeRepository.refreshAllRecipes().observe(viewLifecycleOwner) {
-            binding.fragmentFeedProgressBar.hide()
-            binding.fragmentFeedSwipeRefreshLayout.isRefreshing = false
+        binding?.fragmentFeedProgressBar?.show()
+        RecipeRepository.shared.refreshAllRecipes().observe(viewLifecycleOwner) {
+            binding?.fragmentFeedProgressBar?.hide()
+            binding?.fragmentFeedSwipeRefreshLayout?.isRefreshing = false
         }
     }
 
@@ -131,7 +131,7 @@ class RecipeListFragment : BaseFragment(), RecipeAdapter.OnItemClickListener {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+        binding = null
     }
 }
 

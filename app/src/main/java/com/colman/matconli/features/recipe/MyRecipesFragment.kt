@@ -23,8 +23,7 @@ import com.colman.matconli.utilis.toggleVisibility
 
 class MyRecipesFragment : BaseFragment(), RecipeAdapter.OnItemClickListener {
 
-    private var _binding: FragmentMyRecipesBinding? = null
-    private val binding get() = _binding!!
+    var binding: FragmentMyRecipesBinding? = null
 
     private lateinit var adapter: RecipeAdapter
     private val userId by lazy { getCurrentUserId() }
@@ -33,9 +32,9 @@ class MyRecipesFragment : BaseFragment(), RecipeAdapter.OnItemClickListener {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentMyRecipesBinding.inflate(inflater, container, false)
-        return binding.root
+    ): View? {
+        binding = FragmentMyRecipesBinding.inflate(inflater, container, false)
+        return binding?.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -81,37 +80,38 @@ class MyRecipesFragment : BaseFragment(), RecipeAdapter.OnItemClickListener {
     }
 
     private fun setupRecyclerView() {
-        adapter = RecipeAdapter(listener = this)
-        binding.fragmentMyRecipesRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.fragmentMyRecipesRecyclerView.adapter = adapter
+        adapter = RecipeAdapter()
+        adapter.listener = this
+        binding?.fragmentMyRecipesRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+        binding?.fragmentMyRecipesRecyclerView?.adapter = adapter
     }
 
     private fun setupClickListeners() {
-        binding.fragmentMyRecipesFloatingActionButton.setOnClickListener {
+        binding?.fragmentMyRecipesFloatingActionButton?.setOnClickListener {
             findNavController().navigate(
                 MyRecipesFragmentDirections.actionMyRecipesFragmentToAddRecipeFragment(null)
             )
         }
 
-        binding.fragmentMyRecipesSwipeRefreshLayout.setOnRefreshListener {
+        binding?.fragmentMyRecipesSwipeRefreshLayout?.setOnRefreshListener {
             refreshData()
         }
     }
 
     private fun observeRecipes() {
-        RecipeRepository.recipes.observe(viewLifecycleOwner) { recipes ->
+        RecipeRepository.shared.recipes.observe(viewLifecycleOwner) { recipes ->
             val myRecipes = recipes.filter { it.ownerId == userId }
             adapter.updateRecipes(myRecipes)
-            binding.fragmentMyRecipesTextViewEmpty.visibility = if (myRecipes.isEmpty()) View.VISIBLE else View.GONE
-            binding.fragmentMyRecipesRecyclerView.visibility = if (myRecipes.isEmpty()) View.GONE else View.VISIBLE
+            binding?.fragmentMyRecipesTextViewEmpty?.visibility = if (myRecipes.isEmpty()) View.VISIBLE else View.GONE
+            binding?.fragmentMyRecipesRecyclerView?.visibility = if (myRecipes.isEmpty()) View.GONE else View.VISIBLE
         }
     }
 
     private fun refreshData() {
-        binding.fragmentMyRecipesProgressBar.show()
-        RecipeRepository.refreshAllRecipes().observe(viewLifecycleOwner) {
-            binding.fragmentMyRecipesProgressBar.hide()
-            binding.fragmentMyRecipesSwipeRefreshLayout.isRefreshing = false
+        binding?.fragmentMyRecipesProgressBar?.show()
+        RecipeRepository.shared.refreshAllRecipes().observe(viewLifecycleOwner) {
+            binding?.fragmentMyRecipesProgressBar?.hide()
+            binding?.fragmentMyRecipesSwipeRefreshLayout?.isRefreshing = false
         }
     }
 
@@ -123,7 +123,7 @@ class MyRecipesFragment : BaseFragment(), RecipeAdapter.OnItemClickListener {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+        binding = null
     }
 }
 

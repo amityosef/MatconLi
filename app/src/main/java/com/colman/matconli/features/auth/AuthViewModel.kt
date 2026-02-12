@@ -35,7 +35,7 @@ class AuthViewModel : ViewModel() {
             onSuccess = { user ->
                 val userId = user?.uid
                 if (userId != null) {
-                    UserRepository.ensureUserExists(userId) { success ->
+                    UserRepository.shared.ensureUserExists(userId) { success ->
                         _currentUser.value = authModel.currentUser
                         _authState.value = AuthState.Success
                     }
@@ -82,7 +82,7 @@ class AuthViewModel : ViewModel() {
                     lastUpdated = null
                 )
 
-                UserRepository.createUser(newUser) { success ->
+                UserRepository.shared.createUser(newUser) { success ->
                     if (success) {
                         _currentUser.value = authModel.currentUser
                         _authState.value = AuthState.Success

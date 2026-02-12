@@ -1,24 +1,34 @@
 package com.colman.matconli.data.repository
 
+import android.os.Handler
+import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.colman.matconli.dao.AppLocalDB
+import com.colman.matconli.dao.AppLocalDbRepository
 import com.colman.matconli.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.util.concurrent.Executors
 
-object UserRepository {
+typealias UserCompletion = (User?) -> Unit
+
+class UserRepository private constructor() {
 
     private val db = Firebase.firestore
     private val usersCollection = db.collection("users")
-    private val userDao by lazy { AppLocalDB.db.userDao() }
     private val executor = Executors.newSingleThreadExecutor()
+    private val mainHandler = Handler.createAsync(Looper.getMainLooper())
+    private val database: AppLocalDbRepository = AppLocalDB.db
+
+    companion object Companion {
+        val shared = UserRepository()
+    }
 
     fun getUserById(userId: String): LiveData<User?> {
         refreshUser(userId)
-        return userDao.getById(userId)
+        return database.userDao().getById(userId)
     }
 
     fun refreshUser(userId: String): LiveData<Boolean> {
@@ -31,7 +41,7 @@ object UserRepository {
                     try {
                         if (document.exists()) {
                             val user = User.Companion.fromJson(document.data ?: return@execute)
-                            userDao.insert(user)
+                            database.userDao().insert(user)
                             user.lastUpdated?.let {
                                 if (it > User.Companion.lastUpdated) {
                                     User.Companion.lastUpdated = it
@@ -54,53 +64,57 @@ object UserRepository {
         return result
     }
 
-    fun updateUser(user: User, callback: (Boolean) -> Unit) {
+    fun updateUser(user: User, completion: (Boolean) -> Unit) {
         usersCollection.document(user.id)
             .set(user.toJson)
             .addOnSuccessListener {
                 executor.execute {
                     try {
-                        userDao.insert(user.copy(lastUpdated = System.currentTimeMillis()))
-                        callback(true)
+                        database.userDao().insert(user.copy(lastUpdated = System.currentTimeMillis()))
+                        mainHandler.post {
+                            completion(true)
+                        }
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        callback(false)
+                        mainHandler.post {
+                            completion(false)
+                        }
                     }
                 }
             }
             .addOnFailureListener {
-                try {
-                    callback(false)
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                mainHandler.post {
+                    completion(false)
                 }
             }
     }
 
-    fun createUser(user: User, callback: (Boolean) -> Unit) {
+    fun createUser(user: User, completion: (Boolean) -> Unit) {
         usersCollection.document(user.id)
             .set(user.toJson)
             .addOnSuccessListener {
                 executor.execute {
                     try {
-                        userDao.insert(user.copy(lastUpdated = System.currentTimeMillis()))
-                        callback(true)
+                        database.userDao().insert(user.copy(lastUpdated = System.currentTimeMillis()))
+                        mainHandler.post {
+                            completion(true)
+                        }
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        callback(false)
+                        mainHandler.post {
+                            completion(false)
+                        }
                     }
                 }
             }
             .addOnFailureListener {
-                try {
-                    callback(false)
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                mainHandler.post {
+                    completion(false)
                 }
             }
     }
 
-    fun ensureUserExists(userId: String, callback: (Boolean) -> Unit) {
+    fun ensureUserExists(userId: String, completion: (Boolean) -> Unit) {
         usersCollection.document(userId).get()
             .addOnSuccessListener { document ->
                 try {
@@ -115,23 +129,27 @@ object UserRepository {
                                 avatarUrl = firebaseUser.photoUrl?.toString(),
                                 lastUpdated = null
                             )
-                            createUser(newUser, callback)
+                            createUser(newUser, completion)
                         } else {
-                            callback(false)
+                            mainHandler.post {
+                                completion(false)
+                            }
                         }
                     } else {
-                        callback(true)
+                        mainHandler.post {
+                            completion(true)
+                        }
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    callback(false)
+                    mainHandler.post {
+                        completion(false)
+                    }
                 }
             }
             .addOnFailureListener {
-                try {
-                    callback(false)
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                mainHandler.post {
+                    completion(false)
                 }
             }
     }

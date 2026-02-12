@@ -38,8 +38,7 @@ import java.util.UUID
 
 class AddRecipeFragment : BaseFragment() {
 
-    private var _binding: FragmentAddRecipeBinding? = null
-    private val binding get() = _binding!!
+    var binding: FragmentAddRecipeBinding? = null
 
     private val args: AddRecipeFragmentArgs by navArgs()
     private var existingRecipe: Recipe? = null
@@ -83,9 +82,9 @@ class AddRecipeFragment : BaseFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentAddRecipeBinding.inflate(inflater, container, false)
-        return binding.root
+    ): View? {
+        binding = FragmentAddRecipeBinding.inflate(inflater, container, false)
+        return binding?.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -119,15 +118,15 @@ class AddRecipeFragment : BaseFragment() {
     }
 
     private fun loadExistingRecipe(id: String) {
-        binding.fragmentAddRecipeProgressBar.show()
-        RecipeRepository.getRecipeById(id) { recipe ->
+        binding?.fragmentAddRecipeProgressBar?.show()
+        RecipeRepository.shared.getRecipeById(id) { recipe ->
             activity?.runOnUiThread {
-                if (_binding == null) return@runOnUiThread
-                binding.fragmentAddRecipeProgressBar.hide()
+                if (binding == null) return@runOnUiThread
+                binding?.fragmentAddRecipeProgressBar?.hide()
                 recipe?.let {
                     existingRecipe = it
-                    binding.fragmentAddRecipeEditTextTitle.setText(it.title)
-                    binding.fragmentAddRecipeEditTextDescription.setText(it.description)
+                    binding?.fragmentAddRecipeEditTextTitle?.setText(it.title)
+                    binding?.fragmentAddRecipeEditTextDescription?.setText(it.description)
                     loadImagePreview(it.imageUrl)
                 }
             }
@@ -135,7 +134,9 @@ class AddRecipeFragment : BaseFragment() {
     }
 
     private fun loadImagePreview(url: String?) {
-        ImageUtils.loadImage(binding.fragmentAddRecipeImageView, url, R.drawable.ic_recipe_placeholder)
+        binding?.fragmentAddRecipeImageView?.let {
+            ImageUtils.loadImage(it, url, R.drawable.ic_recipe_placeholder)
+        }
     }
 
     private fun openCamera() {
@@ -163,11 +164,11 @@ class AddRecipeFragment : BaseFragment() {
     }
 
     private fun setupClickListeners() {
-        binding.fragmentAddRecipeButtonSave.setOnClickListener {
+        binding?.fragmentAddRecipeButtonSave?.setOnClickListener {
             saveRecipe()
         }
 
-        binding.fragmentAddRecipeButtonSelectImage.setOnClickListener {
+        binding?.fragmentAddRecipeButtonSelectImage?.setOnClickListener {
             if (ContextCompat.checkSelfPermission(
                     requireContext(),
                     Manifest.permission.CAMERA
@@ -179,14 +180,14 @@ class AddRecipeFragment : BaseFragment() {
             }
         }
 
-        binding.fragmentAddRecipeButtonGallery.setOnClickListener {
+        binding?.fragmentAddRecipeButtonGallery?.setOnClickListener {
             openGallery()
         }
     }
 
     private fun saveRecipe() {
-        val title = binding.fragmentAddRecipeEditTextTitle.text.toString().trim()
-        val description = binding.fragmentAddRecipeEditTextDescription.text.toString().trim()
+        val title = binding?.fragmentAddRecipeEditTextTitle?.text.toString().trim()
+        val description = binding?.fragmentAddRecipeEditTextDescription?.text.toString().trim()
 
         if (title.isBlank() || description.isBlank()) {
             Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show()
@@ -199,8 +200,8 @@ class AddRecipeFragment : BaseFragment() {
             return
         }
 
-        binding.fragmentAddRecipeProgressBar.show()
-        binding.fragmentAddRecipeButtonSave.isEnabled = false
+        binding?.fragmentAddRecipeProgressBar?.show()
+        binding?.fragmentAddRecipeButtonSave?.isEnabled = false
 
         val recipeId = existingRecipe?.id ?: UUID.randomUUID().toString()
 
@@ -223,19 +224,19 @@ class AddRecipeFragment : BaseFragment() {
                     tempRecipe
                 ) { imageUrl ->
                     activity?.runOnUiThread {
-                        if (_binding == null) return@runOnUiThread
+                        if (binding == null) return@runOnUiThread
                         if (imageUrl != null) {
                             createAndSaveRecipe(title, description, imageUrl, currentUserId, recipeId)
                         } else {
-                            binding.fragmentAddRecipeProgressBar.hide()
-                            binding.fragmentAddRecipeButtonSave.isEnabled = true
+                            binding?.fragmentAddRecipeProgressBar?.hide()
+                            binding?.fragmentAddRecipeButtonSave?.isEnabled = true
                             Toast.makeText(requireContext(), "Failed to upload image", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
             } catch (e: Exception) {
-                binding.fragmentAddRecipeProgressBar.hide()
-                binding.fragmentAddRecipeButtonSave.isEnabled = true
+                binding?.fragmentAddRecipeProgressBar?.hide()
+                binding?.fragmentAddRecipeButtonSave?.isEnabled = true
                 Toast.makeText(requireContext(), "Failed to process image", Toast.LENGTH_SHORT).show()
             }
         } else {
@@ -271,9 +272,9 @@ class AddRecipeFragment : BaseFragment() {
 
         val callback: (Boolean) -> Unit = { success ->
             activity?.runOnUiThread {
-                if (_binding == null) return@runOnUiThread
-                binding.fragmentAddRecipeProgressBar.hide()
-                binding.fragmentAddRecipeButtonSave.isEnabled = true
+                if (binding == null) return@runOnUiThread
+                binding?.fragmentAddRecipeProgressBar?.hide()
+                binding?.fragmentAddRecipeButtonSave?.isEnabled = true
                 if (success) {
                     Toast.makeText(requireContext(), "Recipe saved!", Toast.LENGTH_SHORT).show()
                     findNavController().popBackStack()
@@ -284,15 +285,15 @@ class AddRecipeFragment : BaseFragment() {
         }
 
         if (existingRecipe != null) {
-            RecipeRepository.updateRecipe(recipe, callback)
+            RecipeRepository.shared.updateRecipe(recipe, callback)
         } else {
-            RecipeRepository.addRecipe(recipe, callback)
+            RecipeRepository.shared.addRecipe(recipe, callback)
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+        binding = null
     }
 }
 

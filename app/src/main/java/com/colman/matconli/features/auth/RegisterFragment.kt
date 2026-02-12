@@ -15,8 +15,7 @@ import com.colman.matconli.utilis.show
 
 class RegisterFragment : Fragment() {
 
-    private var _binding: FragmentRegisterBinding? = null
-    private val binding get() = _binding!!
+    var binding: FragmentRegisterBinding? = null
 
     private val viewModel: AuthViewModel by viewModels()
 
@@ -24,9 +23,9 @@ class RegisterFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentRegisterBinding.inflate(inflater, container, false)
-        return binding.root
+    ): View? {
+        binding = FragmentRegisterBinding.inflate(inflater, container, false)
+        return binding?.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -37,15 +36,15 @@ class RegisterFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        binding.fragmentRegisterButton.setOnClickListener {
-            val name = binding.fragmentRegisterEditTextName.text.toString().trim()
-            val email = binding.fragmentRegisterEditTextEmail.text.toString().trim()
-            val password = binding.fragmentRegisterEditTextPassword.text.toString()
-            val confirmPassword = binding.fragmentRegisterEditTextConfirmPassword.text.toString()
+        binding?.fragmentRegisterButton?.setOnClickListener {
+            val name = binding?.fragmentRegisterEditTextName?.text.toString().trim()
+            val email = binding?.fragmentRegisterEditTextEmail?.text.toString().trim()
+            val password = binding?.fragmentRegisterEditTextPassword?.text.toString() ?: ""
+            val confirmPassword = binding?.fragmentRegisterEditTextConfirmPassword?.text.toString() ?: ""
             viewModel.register(name, email, password, confirmPassword)
         }
 
-        binding.fragmentRegisterTextViewLogin.setOnClickListener {
+        binding?.fragmentRegisterTextViewLogin?.setOnClickListener {
             findNavController().navigate(
                 RegisterFragmentDirections.actionRegisterFragmentToLoginFragment()
             )
@@ -56,21 +55,21 @@ class RegisterFragment : Fragment() {
         viewModel.authState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is AuthViewModel.AuthState.Loading -> {
-                    binding.fragmentRegisterProgressBar.show()
-                    binding.fragmentRegisterButton.isEnabled = false
+                    binding?.fragmentRegisterProgressBar?.show()
+                    binding?.fragmentRegisterButton?.isEnabled = false
                 }
                 is AuthViewModel.AuthState.Success -> {
-                    binding.fragmentRegisterProgressBar.hide()
+                    binding?.fragmentRegisterProgressBar?.hide()
                     navigateToFeed()
                 }
                 is AuthViewModel.AuthState.Error -> {
-                    binding.fragmentRegisterProgressBar.hide()
-                    binding.fragmentRegisterButton.isEnabled = true
+                    binding?.fragmentRegisterProgressBar?.hide()
+                    binding?.fragmentRegisterButton?.isEnabled = true
                     Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
                 }
                 is AuthViewModel.AuthState.Idle -> {
-                    binding.fragmentRegisterProgressBar.hide()
-                    binding.fragmentRegisterButton.isEnabled = true
+                    binding?.fragmentRegisterProgressBar?.hide()
+                    binding?.fragmentRegisterButton?.isEnabled = true
                 }
             }
         }
@@ -84,7 +83,7 @@ class RegisterFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+        binding = null
     }
 }
 

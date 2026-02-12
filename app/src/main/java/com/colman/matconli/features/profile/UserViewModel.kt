@@ -45,12 +45,12 @@ class UserViewModel : ViewModel() {
 
         _isLoading.postValue(true)
 
-        UserRepository.ensureUserExists(userId) { success ->
+        UserRepository.shared.ensureUserExists(userId) { success ->
             if (isActive) {
                 if (success) {
                     userSource?.let { _currentUser.removeSource(it) }
 
-                    val source = UserRepository.getUserById(userId)
+                    val source = UserRepository.shared.getUserById(userId)
                     userSource = source
 
                     _currentUser.addSource(source) { user ->
@@ -83,7 +83,7 @@ class UserViewModel : ViewModel() {
         )
 
         viewModelScope.launch(Dispatchers.IO) {
-            UserRepository.updateUser(updatedUser) { success ->
+            UserRepository.shared.updateUser(updatedUser) { success ->
                 viewModelScope.launch {
                     withContext(Dispatchers.Main) {
                         _isLoading.value = false

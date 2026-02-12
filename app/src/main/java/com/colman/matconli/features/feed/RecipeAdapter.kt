@@ -4,31 +4,16 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.colman.matconli.R
 import com.colman.matconli.databinding.ItemRecipeBinding
 import com.colman.matconli.model.Recipe
-import com.colman.matconli.utilis.ImageUtils
 
-class RecipeAdapter(
-    private var recipes: MutableList<Recipe> = mutableListOf(),
-    private val listener: OnItemClickListener
-) : RecyclerView.Adapter<RecipeAdapter.RecipeViewHolder>() {
+class RecipeAdapter : RecyclerView.Adapter<RecipeViewHolder>() {
+
+    var listener: OnItemClickListener? = null
+    var recipes: MutableList<Recipe>? = null
 
     interface OnItemClickListener {
         fun onItemClick(recipe: Recipe)
-    }
-
-    inner class RecipeViewHolder(private val binding: ItemRecipeBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-
-        fun bind(recipe: Recipe) {
-            binding.itemRecipeTextViewTitle.text = recipe.title
-            ImageUtils.loadImage(binding.itemRecipeImageView, recipe.imageUrl, R.drawable.ic_recipe_placeholder)
-
-            binding.root.setOnClickListener {
-                listener.onItemClick(recipe)
-            }
-        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecipeViewHolder {
@@ -41,16 +26,22 @@ class RecipeAdapter(
     }
 
     override fun onBindViewHolder(holder: RecipeViewHolder, position: Int) {
-        holder.bind(recipes[position])
+        holder.listener = listener
+        holder.bind(recipes?.get(position))
     }
 
-    override fun getItemCount(): Int = recipes.size
+    override fun getItemCount(): Int = recipes?.size ?: 0
 
     fun updateRecipes(newRecipes: List<Recipe>) {
-        val diffCallback = RecipeDiffCallback(recipes, newRecipes)
+        val oldList = recipes ?: mutableListOf()
+        val diffCallback = RecipeDiffCallback(oldList, newRecipes)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
-        recipes.clear()
-        recipes.addAll(newRecipes)
+        
+        if (recipes == null) {
+            recipes = mutableListOf()
+        }
+        recipes?.clear()
+        recipes?.addAll(newRecipes)
         diffResult.dispatchUpdatesTo(this)
     }
 

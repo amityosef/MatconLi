@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
         if (userId != null) {
             imageView.visibility = View.VISIBLE
             try {
-                val liveData = UserRepository.getUserById(userId)
+                val liveData = UserRepository.shared.getUserById(userId)
                 val observer = Observer<User?> { user ->
                     user?.let {
                         ImageUtils.loadImage(imageView, it.avatarUrl, R.drawable.ic_profile_placeholder)

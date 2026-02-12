@@ -18,8 +18,7 @@ import com.colman.matconli.base.BaseFragment
 
 class RecipeDetailFragment : BaseFragment() {
 
-    private var _binding: FragmentRecipeDetailBinding? = null
-    private val binding get() = _binding!!
+    var binding: FragmentRecipeDetailBinding? = null
 
     private val args: RecipeDetailFragmentArgs by navArgs()
     private var recipe: Recipe? = null
@@ -28,9 +27,9 @@ class RecipeDetailFragment : BaseFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentRecipeDetailBinding.inflate(inflater, container, false)
-        return binding.root
+    ): View? {
+        binding = FragmentRecipeDetailBinding.inflate(inflater, container, false)
+        return binding?.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -41,11 +40,11 @@ class RecipeDetailFragment : BaseFragment() {
     }
 
     private fun loadRecipe() {
-        binding.fragmentRecipeDetailProgressBar.show()
-        RecipeRepository.getRecipeById(args.recipeId) { recipe ->
+        binding?.fragmentRecipeDetailProgressBar?.show()
+        RecipeRepository.shared.getRecipeById(args.recipeId) { recipe ->
             activity?.runOnUiThread {
-                if (_binding == null) return@runOnUiThread
-                binding.fragmentRecipeDetailProgressBar.hide()
+                if (binding == null) return@runOnUiThread
+                binding?.fragmentRecipeDetailProgressBar?.hide()
                 recipe?.let {
                     this.recipe = it
                     displayRecipe(it)
@@ -55,19 +54,21 @@ class RecipeDetailFragment : BaseFragment() {
     }
 
     private fun displayRecipe(recipe: Recipe) {
-        binding.fragmentRecipeDetailTextViewTitle.text = recipe.title
-        binding.fragmentRecipeDetailTextViewDescription.text = recipe.description
-        ImageUtils.loadImage(binding.fragmentRecipeDetailImageView, recipe.imageUrl, R.drawable.ic_recipe_placeholder)
+        binding?.fragmentRecipeDetailTextViewTitle?.text = recipe.title
+        binding?.fragmentRecipeDetailTextViewDescription?.text = recipe.description
+        binding?.fragmentRecipeDetailImageView?.let {
+            ImageUtils.loadImage(it, recipe.imageUrl, R.drawable.ic_recipe_placeholder)
+        }
 
         val currentUserId = getCurrentUserId()
         if (currentUserId == recipe.ownerId) {
-            binding.fragmentRecipeDetailButtonEdit.visibility = View.VISIBLE
-            binding.fragmentRecipeDetailButtonDelete.visibility = View.VISIBLE
+            binding?.fragmentRecipeDetailButtonEdit?.visibility = View.VISIBLE
+            binding?.fragmentRecipeDetailButtonDelete?.visibility = View.VISIBLE
         }
     }
 
     private fun setupClickListeners() {
-        binding.fragmentRecipeDetailButtonEdit.setOnClickListener {
+        binding?.fragmentRecipeDetailButtonEdit?.setOnClickListener {
             recipe?.let {
                 findNavController().navigate(
                     RecipeDetailFragmentDirections.actionRecipeDetailFragmentToAddRecipeFragment(it.id)
@@ -75,13 +76,13 @@ class RecipeDetailFragment : BaseFragment() {
             }
         }
 
-        binding.fragmentRecipeDetailButtonDelete.setOnClickListener {
+        binding?.fragmentRecipeDetailButtonDelete?.setOnClickListener {
             recipe?.let { r ->
-                binding.fragmentRecipeDetailProgressBar.show()
-                RecipeRepository.deleteRecipe(r) { success ->
+                binding?.fragmentRecipeDetailProgressBar?.show()
+                RecipeRepository.shared.deleteRecipe(r) { success ->
                     activity?.runOnUiThread {
-                        if (_binding == null) return@runOnUiThread
-                        binding.fragmentRecipeDetailProgressBar.hide()
+                        if (binding == null) return@runOnUiThread
+                        binding?.fragmentRecipeDetailProgressBar?.hide()
                         if (success) {
                             Toast.makeText(requireContext(), "Recipe deleted", Toast.LENGTH_SHORT).show()
                             findNavController().popBackStack()
@@ -96,7 +97,7 @@ class RecipeDetailFragment : BaseFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+        binding = null
     }
 }
 
