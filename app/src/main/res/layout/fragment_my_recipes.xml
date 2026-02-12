@@ -31,6 +31,8 @@
         android:layout_margin="16dp"
         android:contentDescription="Add Recipe"
         android:src="@android:drawable/ic_input_add"
+        app:backgroundTint="@color/app_primary_light"
+        app:tint="@color/app_primary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
