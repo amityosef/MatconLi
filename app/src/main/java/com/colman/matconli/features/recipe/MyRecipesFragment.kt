@@ -99,7 +99,7 @@ class MyRecipesFragment : BaseFragment(), RecipeAdapter.OnItemClickListener {
     }
 
     private fun observeRecipes() {
-        RecipeRepository.shared.recipes.observe(viewLifecycleOwner) { recipes ->
+        RecipeRepository.shared.getAllRecipes().observe(viewLifecycleOwner) { recipes ->
             val myRecipes = recipes.filter { it.ownerId == userId }
             adapter.updateRecipes(myRecipes)
             binding?.fragmentMyRecipesTextViewEmpty?.visibility = if (myRecipes.isEmpty()) View.VISIBLE else View.GONE
@@ -109,10 +109,9 @@ class MyRecipesFragment : BaseFragment(), RecipeAdapter.OnItemClickListener {
 
     private fun refreshData() {
         binding?.fragmentMyRecipesProgressBar?.show()
-        RecipeRepository.shared.refreshAllRecipes().observe(viewLifecycleOwner) {
-            binding?.fragmentMyRecipesProgressBar?.hide()
-            binding?.fragmentMyRecipesSwipeRefreshLayout?.isRefreshing = false
-        }
+        RecipeRepository.shared.refreshRecipes()
+        binding?.fragmentMyRecipesProgressBar?.hide()
+        binding?.fragmentMyRecipesSwipeRefreshLayout?.isRefreshing = false
     }
 
     override fun onItemClick(recipe: Recipe) {

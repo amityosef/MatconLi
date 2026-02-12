@@ -87,17 +87,12 @@ class RecipeDetailFragment : BaseFragment() {
         binding?.fragmentRecipeDetailButtonDelete?.setOnClickListener {
             recipe?.let { r ->
                 binding?.fragmentRecipeDetailProgressBar?.show()
-                RecipeRepository.shared.deleteRecipe(r) { success ->
-                    activity?.runOnUiThread {
-                        if (binding == null) return@runOnUiThread
-                        binding?.fragmentRecipeDetailProgressBar?.hide()
-                        if (success) {
-                            Toast.makeText(requireContext(), "Recipe deleted", Toast.LENGTH_SHORT).show()
-                            findNavController().popBackStack()
-                        } else {
-                            Toast.makeText(requireContext(), "Failed to delete", Toast.LENGTH_SHORT).show()
-                        }
-                    }
+                RecipeRepository.shared.deleteRecipe(r)
+                activity?.runOnUiThread {
+                    if (binding == null) return@runOnUiThread
+                    binding?.fragmentRecipeDetailProgressBar?.hide()
+                    Toast.makeText(requireContext(), "Recipe deleted", Toast.LENGTH_SHORT).show()
+                    findNavController().popBackStack()
                 }
             }
         }

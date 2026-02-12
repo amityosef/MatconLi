@@ -103,7 +103,7 @@ class RecipeListFragment : BaseFragment(), RecipeAdapter.OnItemClickListener {
     private var hasLoadedInitial = false
 
     private fun observeRecipes() {
-        RecipeRepository.shared.recipes.observe(viewLifecycleOwner) { recipes ->
+        RecipeRepository.shared.getAllRecipes().observe(viewLifecycleOwner) { recipes ->
             adapter.updateRecipes(recipes)
             binding?.fragmentFeedTextViewEmpty?.visibility = if (recipes.isEmpty()) View.VISIBLE else View.GONE
             binding?.fragmentFeedRecyclerView?.visibility = if (recipes.isEmpty()) View.GONE else View.VISIBLE
@@ -117,10 +117,9 @@ class RecipeListFragment : BaseFragment(), RecipeAdapter.OnItemClickListener {
 
     private fun refreshData() {
         binding?.fragmentFeedProgressBar?.show()
-        RecipeRepository.shared.refreshAllRecipes().observe(viewLifecycleOwner) {
-            binding?.fragmentFeedProgressBar?.hide()
-            binding?.fragmentFeedSwipeRefreshLayout?.isRefreshing = false
-        }
+        RecipeRepository.shared.refreshRecipes()
+        binding?.fragmentFeedProgressBar?.hide()
+        binding?.fragmentFeedSwipeRefreshLayout?.isRefreshing = false
     }
 
     override fun onItemClick(recipe: Recipe) {

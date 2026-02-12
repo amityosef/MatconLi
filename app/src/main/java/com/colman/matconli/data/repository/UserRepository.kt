@@ -1,11 +1,12 @@
 package com.colman.matconli.data.repository
 
+import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.colman.matconli.dao.AppLocalDB
 import com.colman.matconli.dao.AppLocalDbRepository
+import com.colman.matconli.data.models.StorageModel
 import com.colman.matconli.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
@@ -16,24 +17,32 @@ typealias UserCompletion = (User?) -> Unit
 
 class UserRepository private constructor() {
 
+    private val storageModel by lazy { StorageModel() }
     private val db = Firebase.firestore
     private val usersCollection = db.collection("users")
     private val executor = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler.createAsync(Looper.getMainLooper())
-    private val database: AppLocalDbRepository = AppLocalDB.db
+    private val database: AppLocalDbRepository by lazy { AppLocalDB.db }
 
     companion object Companion {
-        val shared = UserRepository()
+        val shared by lazy { UserRepository() }
     }
 
-    fun getUserById(userId: String): LiveData<User?> {
+    fun getUserById(userId: String, completion: UserCompletion) {
+        executor.execute {
+            val user = database.userDao().getById(userId).value
+            mainHandler.post {
+                completion(user)
+            }
+        }
+    }
+
+    fun getUserByIdLiveData(userId: String): LiveData<User?> {
         refreshUser(userId)
         return database.userDao().getById(userId)
     }
 
-    fun refreshUser(userId: String): LiveData<Boolean> {
-        val result = MutableLiveData<Boolean>()
-
+    fun refreshUser(userId: String) {
         usersCollection.document(userId)
             .get()
             .addOnSuccessListener { document ->
@@ -47,30 +56,36 @@ class UserRepository private constructor() {
                                     User.Companion.lastUpdated = it
                                 }
                             }
-                            result.postValue(true)
-                        } else {
-                            result.postValue(false)
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        result.postValue(false)
                     }
                 }
             }
-            .addOnFailureListener {
-                result.postValue(false)
-            }
-
-        return result
     }
 
-    fun updateUser(user: User, completion: (Boolean) -> Unit) {
+    fun updateUser(storageAPI: StorageModel.StorageAPI, image: Bitmap?, user: User, completion: (Boolean) -> Unit) {
+        if (image != null) {
+            storageModel.uploadUserImage(storageAPI, image, user.id) { imageUrl ->
+                val userCopy = user.copy(
+                    avatarUrl = imageUrl ?: user.avatarUrl,
+                    lastUpdated = System.currentTimeMillis()
+                )
+                saveUserToFirebase(userCopy, completion)
+            }
+        } else {
+            val userCopy = user.copy(lastUpdated = System.currentTimeMillis())
+            saveUserToFirebase(userCopy, completion)
+        }
+    }
+
+    private fun saveUserToFirebase(user: User, completion: (Boolean) -> Unit) {
         usersCollection.document(user.id)
             .set(user.toJson)
             .addOnSuccessListener {
                 executor.execute {
                     try {
-                        database.userDao().insert(user.copy(lastUpdated = System.currentTimeMillis()))
+                        database.userDao().insert(user)
                         mainHandler.post {
                             completion(true)
                         }

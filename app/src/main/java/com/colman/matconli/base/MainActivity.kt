@@ -29,7 +29,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-
         setupToolbar()
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.activity_main_constraint_layout)) { v, insets ->
@@ -57,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         if (userId != null) {
             imageView.visibility = View.VISIBLE
             try {
-                val liveData = UserRepository.shared.getUserById(userId)
+                val liveData = UserRepository.shared.getUserByIdLiveData(userId)
                 val observer = Observer<User?> { user ->
                     user?.let {
                         if (!it.avatarUrl.isNullOrBlank()) {

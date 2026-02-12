@@ -1,42 +1,40 @@
 package com.colman.matconli.data.repository
 
+import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.colman.matconli.dao.AppLocalDB
 import com.colman.matconli.dao.AppLocalDbRepository
 import com.colman.matconli.data.models.FirebaseModel
+import com.colman.matconli.data.models.StorageModel
 import com.colman.matconli.model.Recipe
 import java.util.concurrent.Executors
 
+typealias Completion = () -> Unit
+
 class RecipeRepository private constructor() {
 
+    private val storageModel by lazy { StorageModel() }
     private val firebaseModel = FirebaseModel()
     private val executor = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler.createAsync(Looper.getMainLooper())
-    private val database: AppLocalDbRepository = AppLocalDB.db
-
-    val recipes: LiveData<MutableList<Recipe>> by lazy {
-        database.recipeDao().getAll()
-    }
+    private val database: AppLocalDbRepository by lazy { AppLocalDB.db }
 
     companion object Companion {
-        val shared = RecipeRepository()
+        val shared by lazy { RecipeRepository() }
     }
 
     fun getAllRecipes(): LiveData<MutableList<Recipe>> {
-        return recipes
+        return database.recipeDao().getAll()
     }
 
-    fun refreshAllRecipes(): LiveData<Boolean> {
-        val result = MutableLiveData<Boolean>()
+    fun refreshRecipes() {
         val lastUpdated = Recipe.Companion.lastUpdated
 
         firebaseModel.getAllRecipes(lastUpdated) { recipesList ->
             executor.execute {
                 var time = lastUpdated
-
                 for (recipe in recipesList) {
                     database.recipeDao().insert(recipe)
                     recipe.lastUpdated?.let { recipeLastUpdated ->
@@ -45,15 +43,11 @@ class RecipeRepository private constructor() {
                         }
                     }
                 }
-
                 if (recipesList.isNotEmpty()) {
                     Recipe.Companion.lastUpdated = time
                 }
-                result.postValue(true)
             }
         }
-
-        return result
     }
 
     fun getRecipeById(id: String, callback: (Recipe?) -> Unit) {
@@ -65,35 +59,68 @@ class RecipeRepository private constructor() {
         }
     }
 
-    fun addRecipe(recipe: Recipe, completion: (Boolean) -> Unit) {
-        firebaseModel.saveRecipe(recipe) {
-            executor.execute {
-                database.recipeDao().insert(recipe.copy(lastUpdated = System.currentTimeMillis()))
-                mainHandler.post {
-                    completion(true)
+    fun addRecipe(storageAPI: StorageModel.StorageAPI, image: Bitmap?, recipe: Recipe, completion: Completion) {
+        if (image != null) {
+            storageModel.uploadRecipeImage(storageAPI, image, recipe) { imageUrl ->
+                val recipeCopy = recipe.copy(
+                    imageUrl = imageUrl ?: recipe.imageUrl,
+                    lastUpdated = System.currentTimeMillis()
+                )
+                firebaseModel.saveRecipe(recipeCopy) {
+                    executor.execute {
+                        database.recipeDao().insert(recipeCopy)
+                        mainHandler.post {
+                            completion()
+                        }
+                    }
+                }
+            }
+        } else {
+            val recipeCopy = recipe.copy(lastUpdated = System.currentTimeMillis())
+            firebaseModel.saveRecipe(recipeCopy) {
+                executor.execute {
+                    database.recipeDao().insert(recipeCopy)
+                    mainHandler.post {
+                        completion()
+                    }
                 }
             }
         }
     }
 
-    fun updateRecipe(recipe: Recipe, completion: (Boolean) -> Unit) {
-        firebaseModel.updateRecipe(recipe) {
-            executor.execute {
-                database.recipeDao().update(recipe.copy(lastUpdated = System.currentTimeMillis()))
-                mainHandler.post {
-                    completion(true)
+    fun updateRecipe(storageAPI: StorageModel.StorageAPI, image: Bitmap?, recipe: Recipe, completion: Completion) {
+        if (image != null) {
+            storageModel.uploadRecipeImage(storageAPI, image, recipe) { imageUrl ->
+                val recipeCopy = recipe.copy(
+                    imageUrl = imageUrl ?: recipe.imageUrl,
+                    lastUpdated = System.currentTimeMillis()
+                )
+                firebaseModel.updateRecipe(recipeCopy) {
+                    executor.execute {
+                        database.recipeDao().update(recipeCopy)
+                        mainHandler.post {
+                            completion()
+                        }
+                    }
+                }
+            }
+        } else {
+            val recipeCopy = recipe.copy(lastUpdated = System.currentTimeMillis())
+            firebaseModel.updateRecipe(recipeCopy) {
+                executor.execute {
+                    database.recipeDao().update(recipeCopy)
+                    mainHandler.post {
+                        completion()
+                    }
                 }
             }
         }
     }
 
-    fun deleteRecipe(recipe: Recipe, completion: (Boolean) -> Unit) {
+    fun deleteRecipe(recipe: Recipe) {
         firebaseModel.deleteRecipe(recipe) {
             executor.execute {
                 database.recipeDao().delete(recipe)
-                mainHandler.post {
-                    completion(true)
-                }
             }
         }
     }

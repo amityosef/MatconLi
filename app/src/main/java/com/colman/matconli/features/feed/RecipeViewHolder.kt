@@ -15,11 +15,15 @@ class RecipeViewHolder(
     fun bind(recipe: Recipe?) {
         recipe?.let {
             binding.itemRecipeTextViewTitle.text = it.title
-            Picasso.get()
-                .load(it.imageUrl)
-                .placeholder(R.drawable.ic_recipe_placeholder)
-                .error(R.drawable.ic_recipe_placeholder)
-                .into(binding.itemRecipeImageView)
+            if (!it.imageUrl.isNullOrBlank()) {
+                Picasso.get()
+                    .load(it.imageUrl)
+                    .placeholder(R.drawable.ic_recipe_placeholder)
+                    .error(R.drawable.ic_recipe_placeholder)
+                    .into(binding.itemRecipeImageView)
+            } else {
+                binding.itemRecipeImageView.setImageResource(R.drawable.ic_recipe_placeholder)
+            }
 
             binding.root.setOnClickListener { _ ->
                 listener?.onItemClick(it)

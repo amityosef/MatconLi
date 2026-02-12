@@ -50,7 +50,7 @@ class UserViewModel : ViewModel() {
                 if (success) {
                     userSource?.let { _currentUser.removeSource(it) }
 
-                    val source = UserRepository.shared.getUserById(userId)
+                    val source = UserRepository.shared.getUserByIdLiveData(userId)
                     userSource = source
 
                     _currentUser.addSource(source) { user ->
@@ -83,7 +83,11 @@ class UserViewModel : ViewModel() {
         )
 
         viewModelScope.launch(Dispatchers.IO) {
-            UserRepository.shared.updateUser(updatedUser) { success ->
+            UserRepository.shared.updateUser(
+                storageAPI = com.colman.matconli.data.models.StorageModel.StorageAPI.CLOUDINARY,
+                image = null,
+                user = updatedUser
+            ) { success ->
                 viewModelScope.launch {
                     withContext(Dispatchers.Main) {
                         _isLoading.value = false

@@ -17,7 +17,7 @@ import com.squareup.picasso.Picasso
 
 class ProfileFragment : BaseFragment() {
 
-    private var _binding: FragmentProfileBinding? = null
+    private var binding: FragmentProfileBinding? = null
 
     private val viewModel: UserViewModel by viewModels()
 
@@ -26,8 +26,8 @@ class ProfileFragment : BaseFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentProfileBinding.inflate(inflater, container, false)
-        return _binding?.root ?: inflater.inflate(R.layout.fragment_profile, container, false)
+        binding = FragmentProfileBinding.inflate(inflater, container, false)
+        return binding?.root ?: inflater.inflate(R.layout.fragment_profile, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -40,7 +40,7 @@ class ProfileFragment : BaseFragment() {
 
     private fun setupObservers() {
         viewModel.currentUser.observe(viewLifecycleOwner) { user ->
-            _binding?.let { binding ->
+            binding?.let { binding ->
                 if (user != null) {
                     binding.fragmentProfileTextViewName.text = user.name
                     binding.fragmentProfileTextViewEmail.text = user.email
@@ -62,14 +62,14 @@ class ProfileFragment : BaseFragment() {
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            _binding?.let { binding ->
+            binding?.let { binding ->
                 binding.fragmentProfileProgressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
             }
         }
     }
 
     private fun setupClickListeners() {
-        _binding?.let { binding ->
+        binding?.let { binding ->
             binding.fragmentProfileButtonEdit.setOnClickListener {
                 findNavController().navigate(
                     ProfileFragmentDirections.actionProfileFragmentToEditProfileFragment()
@@ -84,7 +84,7 @@ class ProfileFragment : BaseFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+        binding = null
     }
 }
 

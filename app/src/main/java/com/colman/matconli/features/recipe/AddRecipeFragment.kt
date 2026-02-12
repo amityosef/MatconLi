@@ -179,10 +179,6 @@ class AddRecipeFragment : BaseFragment() {
                 cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
             }
         }
-
-        binding?.fragmentAddRecipeButtonGallery?.setOnClickListener {
-            openGallery()
-        }
     }
 
     private fun saveRecipe() {
@@ -200,47 +196,57 @@ class AddRecipeFragment : BaseFragment() {
             return
         }
 
+        val isEditing = existingRecipe != null
+
         binding?.fragmentAddRecipeProgressBar?.show()
         binding?.fragmentAddRecipeButtonSave?.isEnabled = false
 
         val recipeId = existingRecipe?.id ?: UUID.randomUUID().toString()
 
-        if (selectedImageUri != null) {
-            try {
-                val bitmap = getBitmapFromUri(selectedImageUri!!)
-                val tempRecipe = Recipe(
-                    id = recipeId,
-                    title = title,
-                    description = description,
-                    imageUrl = null,
-                    ownerId = currentUserId,
-                    lastUpdated = System.currentTimeMillis()
-                )
+        try {
+            val bitmap = selectedImageUri?.let { getBitmapFromUri(it) }
+            val recipe = Recipe(
+                id = recipeId,
+                title = title,
+                description = description,
+                imageUrl = existingRecipe?.imageUrl,
+                ownerId = currentUserId,
+                lastUpdated = null
+            )
 
-                // Upload image to Firebase Storage
-                storageModel.uploadRecipeImage(
-                    StorageModel.StorageAPI.FIREBASE,
-                    bitmap,
-                    tempRecipe
-                ) { imageUrl ->
+            if (isEditing) {
+                RecipeRepository.shared.updateRecipe(
+                    storageAPI = StorageModel.StorageAPI.CLOUDINARY,
+                    image = bitmap,
+                    recipe = recipe
+                ) {
                     activity?.runOnUiThread {
                         if (binding == null) return@runOnUiThread
-                        if (imageUrl != null) {
-                            createAndSaveRecipe(title, description, imageUrl, currentUserId, recipeId)
-                        } else {
-                            binding?.fragmentAddRecipeProgressBar?.hide()
-                            binding?.fragmentAddRecipeButtonSave?.isEnabled = true
-                            Toast.makeText(requireContext(), "Failed to upload image", Toast.LENGTH_SHORT).show()
-                        }
+                        binding?.fragmentAddRecipeProgressBar?.hide()
+                        binding?.fragmentAddRecipeButtonSave?.isEnabled = true
+                        Toast.makeText(requireContext(), "Recipe updated!", Toast.LENGTH_SHORT).show()
+                        findNavController().popBackStack()
                     }
                 }
-            } catch (e: Exception) {
-                binding?.fragmentAddRecipeProgressBar?.hide()
-                binding?.fragmentAddRecipeButtonSave?.isEnabled = true
-                Toast.makeText(requireContext(), "Failed to process image", Toast.LENGTH_SHORT).show()
+            } else {
+                RecipeRepository.shared.addRecipe(
+                    storageAPI = StorageModel.StorageAPI.CLOUDINARY,
+                    image = bitmap,
+                    recipe = recipe
+                ) {
+                    activity?.runOnUiThread {
+                        if (binding == null) return@runOnUiThread
+                        binding?.fragmentAddRecipeProgressBar?.hide()
+                        binding?.fragmentAddRecipeButtonSave?.isEnabled = true
+                        Toast.makeText(requireContext(), "Recipe saved!", Toast.LENGTH_SHORT).show()
+                        findNavController().popBackStack()
+                    }
+                }
             }
-        } else {
-            createAndSaveRecipe(title, description, existingRecipe?.imageUrl, currentUserId, recipeId)
+        } catch (e: Exception) {
+            binding?.fragmentAddRecipeProgressBar?.hide()
+            binding?.fragmentAddRecipeButtonSave?.isEnabled = true
+            Toast.makeText(requireContext(), "Failed to process image", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -257,37 +263,6 @@ class AddRecipeFragment : BaseFragment() {
             Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
         } else {
             bitmap
-        }
-    }
-
-    private fun createAndSaveRecipe(title: String, description: String, imageUrl: String?, ownerId: String, recipeId: String) {
-        val recipe = Recipe(
-            id = recipeId,
-            title = title,
-            description = description,
-            imageUrl = imageUrl,
-            ownerId = ownerId,
-            lastUpdated = System.currentTimeMillis()
-        )
-
-        val callback: (Boolean) -> Unit = { success ->
-            activity?.runOnUiThread {
-                if (binding == null) return@runOnUiThread
-                binding?.fragmentAddRecipeProgressBar?.hide()
-                binding?.fragmentAddRecipeButtonSave?.isEnabled = true
-                if (success) {
-                    Toast.makeText(requireContext(), "Recipe saved!", Toast.LENGTH_SHORT).show()
-                    findNavController().popBackStack()
-                } else {
-                    Toast.makeText(requireContext(), "Failed to save recipe", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-        if (existingRecipe != null) {
-            RecipeRepository.shared.updateRecipe(recipe, callback)
-        } else {
-            RecipeRepository.shared.addRecipe(recipe, callback)
         }
     }
 
