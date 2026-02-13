@@ -80,25 +80,28 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/fragment_add_recipe_button_save"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="Save Recipe"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="120dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="48dp"
+            android:text="Save"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_add_recipe_text_input_layout_description" />
+            app:layout_constraintTop_toBottomOf="@+id/fragment_add_recipe_text_input_layout_description" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/fragment_add_recipe_button_cancel"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="0dp"
+            android:layout_width="120dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginEnd="40dp"
+            android:background="#00FFFFFF"
             android:text="Cancel"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:strokeWidth="1dp"
+            app:strokeColor="#D5D5D5"
+            app:layout_constraintBaseline_toBaselineOf="@+id/fragment_add_recipe_button_save"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_add_recipe_button_save" />
+            app:layout_constraintHorizontal_bias="0.544"
+            app:layout_constraintStart_toEndOf="@+id/fragment_add_recipe_button_save" />
 
         <ProgressBar
             android:id="@+id/fragment_add_recipe_progress_bar"

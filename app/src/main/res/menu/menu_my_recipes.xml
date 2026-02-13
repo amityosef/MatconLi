@@ -8,6 +8,11 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/action_search_external"
+        android:title="Search Recipes"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_profile"
         android:title="Profile"
         app:showAsAction="never" />

@@ -17,6 +17,7 @@ import com.colman.matconli.features.feed.RecipeAdapter
 import com.colman.matconli.model.Recipe
 import com.colman.matconli.data.repository.RecipeRepository
 import com.colman.matconli.base.BaseFragment
+import com.colman.matconli.features.feed.RecipeListFragmentDirections
 import com.colman.matconli.utilis.hide
 import com.colman.matconli.utilis.show
 import com.colman.matconli.utilis.toggleVisibility
@@ -61,6 +62,12 @@ class MyRecipesFragment : BaseFragment(), RecipeAdapter.OnItemClickListener {
                 return when (menuItem.itemId) {
                     R.id.action_main_feed -> {
                         findNavController().popBackStack()
+                        true
+                    }
+                    R.id.action_search_external -> {
+                        findNavController().navigate(
+                            RecipeListFragmentDirections.actionFeedFragmentToExternalSearchFragment()
+                        )
                         true
                     }
                     R.id.action_profile -> {

@@ -74,24 +74,27 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/fragment_edit_profile_button_save"
-            android:layout_width="0dp"
+            android:layout_width="120dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="Save Changes"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="60dp"
+            android:text="Save "
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_edit_profile_text_view_email" />
+            app:layout_constraintTop_toBottomOf="@+id/fragment_edit_profile_text_view_email" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/fragment_edit_profile_button_cancel"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="0dp"
+            android:layout_width="120dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginEnd="40dp"
             android:text="Cancel"
+            app:cornerRadius="50dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#D5D5D5"
+            app:layout_constraintBaseline_toBaselineOf="@+id/fragment_edit_profile_button_save"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_edit_profile_button_save" />
+            app:layout_constraintStart_toEndOf="@+id/fragment_edit_profile_button_save" />
 
         <ProgressBar
             android:id="@+id/fragment_edit_profile_progress_bar"

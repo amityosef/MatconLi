@@ -46,25 +46,33 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/fragment_recipe_detail_button_edit"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
+            android:layout_width="120dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
+            android:layout_marginStart="40dp"
             android:text="Edit"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_recipe_detail_text_view_description" />
+            app:strokeWidth="1dp"
+            app:strokeColor="#D5D5D5"
+            app:layout_constraintBaseline_toBaselineOf="@+id/fragment_recipe_detail_button_delete"
+            app:layout_constraintEnd_toStartOf="@+id/fragment_recipe_detail_button_delete"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/fragment_recipe_detail_button_delete"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
+            android:layout_width="120dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="40dp"
             android:text="Delete"
-            android:visibility="gone"
+            app:cornerRadius="50dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_recipe_detail_text_view_description" />
+            app:layout_constraintHorizontal_bias="0.824"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_recipe_detail_text_view_description"
+            app:strokeColor="#D5D5D5"
+            app:strokeWidth="1dp" />
 
         <ProgressBar
             android:id="@+id/fragment_recipe_detail_progress_bar"
