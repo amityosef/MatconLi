@@ -16,14 +16,14 @@ class UserViewModel : ViewModel() {
 
     private val auth = FirebaseAuth.getInstance()
 
-    private val _currentUser = MediatorLiveData<User?>()
-    val currentUser: LiveData<User?> = _currentUser
+    private val currentUserMutable = MediatorLiveData<User?>()
+    val currentUser: LiveData<User?> = currentUserMutable
 
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> = _isLoading
+    private val isLoadingMutable = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = isLoadingMutable
 
-    private val _updateResult = MutableLiveData<Boolean?>()
-    val updateResult: LiveData<Boolean?> = _updateResult
+    private val updateResultMutable = MutableLiveData<Boolean?>()
+    val updateResult: LiveData<Boolean?> = updateResultMutable
 
     private var userSource: LiveData<User?>? = null
     private var isActive = true
@@ -31,37 +31,37 @@ class UserViewModel : ViewModel() {
     override fun onCleared() {
         super.onCleared()
         isActive = false
-        userSource?.let { _currentUser.removeSource(it) }
+        userSource?.let { currentUserMutable.removeSource(it) }
         userSource = null
     }
 
     fun loadCurrentUser() {
         val userId = auth.currentUser?.uid
         if (userId == null) {
-            _isLoading.postValue(false)
-            _currentUser.postValue(null)
+            isLoadingMutable.postValue(false)
+            currentUserMutable.postValue(null)
             return
         }
 
-        _isLoading.postValue(true)
+        isLoadingMutable.postValue(true)
 
         UserRepository.shared.ensureUserExists(userId) { success ->
             if (isActive) {
                 if (success) {
-                    userSource?.let { _currentUser.removeSource(it) }
+                    userSource?.let { currentUserMutable.removeSource(it) }
 
                     val source = UserRepository.shared.getUserByIdLiveData(userId)
                     userSource = source
 
-                    _currentUser.addSource(source) { user ->
+                    currentUserMutable.addSource(source) { user ->
                         if (isActive) {
-                            _currentUser.postValue(user)
-                            _isLoading.postValue(false)
+                            currentUserMutable.postValue(user)
+                            isLoadingMutable.postValue(false)
                         }
                     }
                 } else {
-                    _isLoading.postValue(false)
-                    _currentUser.postValue(null)
+                    isLoadingMutable.postValue(false)
+                    currentUserMutable.postValue(null)
                 }
             }
         }
@@ -71,8 +71,8 @@ class UserViewModel : ViewModel() {
         val userId = auth.currentUser?.uid ?: return
         val email = auth.currentUser?.email ?: return
 
-        _isLoading.value = true
-        _updateResult.value = null
+        isLoadingMutable.value = true
+        updateResultMutable.value = null
 
         val updatedUser = User(
             id = userId,
@@ -90,10 +90,10 @@ class UserViewModel : ViewModel() {
             ) { success ->
                 viewModelScope.launch {
                     withContext(Dispatchers.Main) {
-                        _isLoading.value = false
-                        _updateResult.value = success
+                        isLoadingMutable.value = false
+                        updateResultMutable.value = success
                         if (success) {
-                            _currentUser.value = updatedUser
+                            currentUserMutable.value = updatedUser
                         }
                     }
                 }
@@ -102,7 +102,7 @@ class UserViewModel : ViewModel() {
     }
 
     fun clearUpdateResult() {
-        _updateResult.value = null
+        updateResultMutable.value = null
     }
 }
 

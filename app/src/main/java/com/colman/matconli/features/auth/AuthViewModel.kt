@@ -12,23 +12,23 @@ class AuthViewModel : ViewModel() {
 
     private val authModel = FirebaseAuthModel()
 
-    private val _authState = MutableLiveData<AuthState>()
-    val authState: LiveData<AuthState> = _authState
+    private val authStateMutable = MutableLiveData<AuthState>()
+    val authState: LiveData<AuthState> = authStateMutable
 
-    private val _currentUser = MutableLiveData<FirebaseUser?>()
-    val currentUser: LiveData<FirebaseUser?> = _currentUser
+    private val currentUserMutable = MutableLiveData<FirebaseUser?>()
+    val currentUser: LiveData<FirebaseUser?> = currentUserMutable
 
     init {
-        _currentUser.value = authModel.currentUser
+        currentUserMutable.value = authModel.currentUser
     }
 
     fun login(email: String, password: String) {
         if (email.isBlank() || password.isBlank()) {
-            _authState.value = AuthState.Error("Please fill in all fields")
+            authStateMutable.value = AuthState.Error("Please fill in all fields")
             return
         }
 
-        _authState.value = AuthState.Loading
+        authStateMutable.value = AuthState.Loading
         authModel.signIn(
             email = email,
             password = password,
@@ -36,37 +36,37 @@ class AuthViewModel : ViewModel() {
                 val userId = user?.uid
                 if (userId != null) {
                     UserRepository.shared.ensureUserExists(userId) { success ->
-                        _currentUser.value = authModel.currentUser
-                        _authState.value = AuthState.Success
+                        currentUserMutable.value = authModel.currentUser
+                        authStateMutable.value = AuthState.Success
                     }
                 } else {
-                    _currentUser.value = authModel.currentUser
-                    _authState.value = AuthState.Success
+                    currentUserMutable.value = authModel.currentUser
+                    authStateMutable.value = AuthState.Success
                 }
             },
             onFailure = { errorMessage ->
-                _authState.value = AuthState.Error(errorMessage)
+                authStateMutable.value = AuthState.Error(errorMessage)
             }
         )
     }
 
     fun register(name: String, email: String, password: String, confirmPassword: String) {
         if (name.isBlank() || email.isBlank() || password.isBlank()) {
-            _authState.value = AuthState.Error("Please fill in all fields")
+            authStateMutable.value = AuthState.Error("Please fill in all fields")
             return
         }
 
         if (password != confirmPassword) {
-            _authState.value = AuthState.Error("Passwords do not match")
+            authStateMutable.value = AuthState.Error("Passwords do not match")
             return
         }
 
         if (password.length < 6) {
-            _authState.value = AuthState.Error("Password must be at least 6 characters")
+            authStateMutable.value = AuthState.Error("Password must be at least 6 characters")
             return
         }
 
-        _authState.value = AuthState.Loading
+        authStateMutable.value = AuthState.Loading
         authModel.signUp(
             email = email,
             password = password,
@@ -84,29 +84,29 @@ class AuthViewModel : ViewModel() {
 
                 UserRepository.shared.createUser(newUser) { success ->
                     if (success) {
-                        _currentUser.value = authModel.currentUser
-                        _authState.value = AuthState.Success
+                        currentUserMutable.value = authModel.currentUser
+                        authStateMutable.value = AuthState.Success
                     } else {
-                        _authState.value = AuthState.Error("Failed to create user profile")
+                        authStateMutable.value = AuthState.Error("Failed to create user profile")
                     }
                 }
             },
             onFailure = { errorMessage ->
-                _authState.value = AuthState.Error(errorMessage)
+                authStateMutable.value = AuthState.Error(errorMessage)
             }
         )
     }
 
     fun logout() {
         authModel.signOut()
-        _currentUser.value = null
-        _authState.value = AuthState.Idle
+        currentUserMutable.value = null
+        authStateMutable.value = AuthState.Idle
     }
 
     fun isLoggedIn(): Boolean = authModel.isLoggedIn()
 
     fun resetState() {
-        _authState.value = AuthState.Idle
+        authStateMutable.value = AuthState.Idle
     }
 
     sealed class AuthState {

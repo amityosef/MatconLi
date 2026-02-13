@@ -15,10 +15,6 @@ fun View.toggleVisibility(show: Boolean) {
     visibility = if (show) View.VISIBLE else View.GONE
 }
 
-/**
- * Safely run UI operations on the main thread, checking if the fragment is still attached
- * Useful for callbacks that may execute after fragment is destroyed
- */
 inline fun Fragment.runOnUiThreadSafe(crossinline block: () -> Unit) {
     activity?.runOnUiThread {
         if (isAdded && view != null) {

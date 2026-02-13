@@ -1,7 +1,6 @@
 package com.colman.matconli.data.models
 
 import android.graphics.Bitmap
-import android.util.Log
 import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
@@ -30,27 +29,21 @@ class CloudinaryStorageModel {
             .option("folder", folder)
             .callback(object : UploadCallback {
                 override fun onStart(requestId: String?) {
-                    Log.d("CloudinaryStorageModel", "Upload started: $requestId")
                 }
 
                 override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {
-                    val progress = bytes.toDouble() / totalBytes * 100
-                    Log.d("CloudinaryStorageModel", "Upload progress: $progress%")
                 }
 
                 override fun onSuccess(requestId: String?, resultData: MutableMap<Any?, Any?>?) {
                     val url = resultData?.get("secure_url") as? String
-                    Log.d("CloudinaryStorageModel", "Upload success: $url")
                     completion(url)
                 }
 
                 override fun onError(requestId: String?, error: ErrorInfo?) {
-                    Log.e("CloudinaryStorageModel", "Upload error: ${error?.description}")
                     completion(null)
                 }
 
                 override fun onReschedule(requestId: String?, error: ErrorInfo?) {
-                    Log.d("CloudinaryStorageModel", "Upload rescheduled: ${error?.description}")
                 }
             })
             .dispatch()

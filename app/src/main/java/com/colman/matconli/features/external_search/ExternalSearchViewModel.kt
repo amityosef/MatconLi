@@ -12,23 +12,23 @@ import kotlinx.coroutines.withContext
 
 class ExternalSearchViewModel : ViewModel() {
 
-    private val _recipes = MutableLiveData<List<ExternalRecipe>>()
-    val recipes: LiveData<List<ExternalRecipe>> = _recipes
+    private val recipesMutable = MutableLiveData<List<ExternalRecipe>>()
+    val recipes: LiveData<List<ExternalRecipe>> = recipesMutable
 
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> = _isLoading
+    private val isLoadingMutable = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = isLoadingMutable
 
-    private val _error = MutableLiveData<String?>()
-    val error: LiveData<String?> = _error
+    private val errorMutable = MutableLiveData<String?>()
+    val error: LiveData<String?> = errorMutable
 
     fun searchRecipes(query: String) {
         if (query.isBlank()) {
-            _recipes.value = emptyList()
+            recipesMutable.value = emptyList()
             return
         }
 
-        _isLoading.value = true
-        _error.value = null
+        isLoadingMutable.value = true
+        errorMutable.value = null
 
         viewModelScope.launch {
             try {
@@ -36,17 +36,17 @@ class ExternalSearchViewModel : ViewModel() {
                     RemoteRecipeRepository.shared.searchRecipes(query)
                 }
 
-                _recipes.value = result.meals ?: emptyList()
-                _isLoading.value = false
+                recipesMutable.value = result.meals ?: emptyList()
+                isLoadingMutable.value = false
             } catch (e: Exception) {
-                _error.value = "Failed to search recipes: ${e.message}"
-                _recipes.value = emptyList()
-                _isLoading.value = false
+                errorMutable.value = "Failed to search recipes: ${e.message}"
+                recipesMutable.value = emptyList()
+                isLoadingMutable.value = false
             }
         }
     }
 
     fun clearError() {
-        _error.value = null
+        errorMutable.value = null
     }
 }
