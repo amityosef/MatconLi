@@ -6,12 +6,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.colman.matconli.databinding.ItemExternalRecipeBinding
 import com.colman.matconli.model.ExternalRecipe
 
-interface OnItemClickListener {
-    fun onItemClick(recipe: ExternalRecipe)
-}
-
 class ExternalRecipeAdapter : RecyclerView.Adapter<ExternalRecipeViewHolder>() {
 
+    interface OnItemClickListener {
+        fun onItemClick(recipe: ExternalRecipe)
+    }
     var listener: OnItemClickListener? = null
     var recipes: MutableList<ExternalRecipe>? = null
 
