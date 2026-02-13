@@ -59,7 +59,16 @@
         <action
             android:id="@+id/action_feedFragment_to_myRecipesFragment"
             app:destination="@id/myRecipesFragment" />
+        <action
+            android:id="@+id/action_feedFragment_to_externalSearchFragment"
+            app:destination="@id/externalSearchFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/externalSearchFragment"
+        android:name="com.colman.matconli.features.external_search.ExternalSearchFragment"
+        android:label="Search Recipes"
+        tools:layout="@layout/fragment_external_search" />
 
     <fragment
         android:id="@+id/profileFragment"
