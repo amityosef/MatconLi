@@ -62,6 +62,10 @@ dependencies {
     implementation(libs.picasso)
     implementation(libs.cloudinary)
 
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.gson)
+
     implementation(libs.navigation.fragment.ktx)
     implementation(libs.navigation.ui.ktx)
 

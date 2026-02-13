@@ -64,6 +64,12 @@ class RecipeListFragment : BaseFragment(), RecipeAdapter.OnItemClickListener {
                         )
                         true
                     }
+                    R.id.action_search_external -> {
+                        findNavController().navigate(
+                            RecipeListFragmentDirections.actionFeedFragmentToExternalSearchFragment()
+                        )
+                        true
+                    }
                     R.id.action_profile -> {
                         findNavController().navigate(
                             RecipeListFragmentDirections.actionFeedFragmentToProfileFragment()

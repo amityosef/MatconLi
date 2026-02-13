@@ -11,17 +11,12 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.view.MenuProvider
-import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.colman.matconli.R
@@ -90,31 +85,11 @@ class AddRecipeFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupMenu()
-
         args.recipeId?.let { id ->
             loadExistingRecipe(id)
         }
 
         setupClickListeners()
-    }
-
-    private fun setupMenu() {
-        requireActivity().addMenuProvider(object : MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.menu_add_recipe, menu)
-            }
-
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                return when (menuItem.itemId) {
-                    R.id.action_main_feed -> {
-                        findNavController().popBackStack()
-                        true
-                    }
-                    else -> false
-                }
-            }
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
     private fun loadExistingRecipe(id: String) {
@@ -166,6 +141,9 @@ class AddRecipeFragment : BaseFragment() {
     private fun setupClickListeners() {
         binding?.fragmentAddRecipeButtonSave?.setOnClickListener {
             saveRecipe()
+        }
+        binding?.fragmentAddRecipeButtonCancel?.setOnClickListener {
+            findNavController().popBackStack()
         }
 
         binding?.fragmentAddRecipeButtonSelectImage?.setOnClickListener {

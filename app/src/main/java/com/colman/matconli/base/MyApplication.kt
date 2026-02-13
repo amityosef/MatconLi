@@ -5,6 +5,8 @@ import android.content.Context
 import com.cloudinary.android.MediaManager
 import com.cloudinary.android.policy.GlobalUploadPolicy
 import com.cloudinary.android.policy.UploadPolicy
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
 
 class MyApplication : Application() {
 
@@ -15,7 +17,19 @@ class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         Globals.appContext = applicationContext
+        disableFirebasePersistence()
         initCloudinary()
+    }
+
+    private fun disableFirebasePersistence() {
+        try {
+            val settings = FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(false)
+                .build()
+            FirebaseFirestore.getInstance().firestoreSettings = settings
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun initCloudinary() {
