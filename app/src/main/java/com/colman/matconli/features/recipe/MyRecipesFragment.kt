@@ -27,7 +27,7 @@ class MyRecipesFragment : BaseFragment(), RecipeAdapter.OnItemClickListener {
     var binding: FragmentMyRecipesBinding? = null
 
     private lateinit var adapter: RecipeAdapter
-    private val userId by lazy { getCurrentUserId() }
+    private var userId: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,6 +41,7 @@ class MyRecipesFragment : BaseFragment(), RecipeAdapter.OnItemClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        userId = getCurrentUserId()
         setupMenu()
         setupRecyclerView()
         setupClickListeners()

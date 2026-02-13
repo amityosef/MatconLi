@@ -6,12 +6,10 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object NetworkClient {
 
-    private val okHttpClient: OkHttpClient by lazy {
-        OkHttpClient.Builder()
-            .build()
-    }
+    private val okHttpClient: OkHttpClient = OkHttpClient.Builder()
+        .build()
 
-    val mealDbClient: MealDbClient by lazy {
+    val mealDbClient: MealDbClient = run {
         val retrofit = Retrofit.Builder()
             .baseUrl("https://www.themealdb.com/api/json/v1/1/")
             .client(okHttpClient)

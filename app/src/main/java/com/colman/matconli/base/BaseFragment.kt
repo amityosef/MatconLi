@@ -7,7 +7,7 @@ import com.colman.matconli.data.models.FirebaseAuthModel
 
 abstract class BaseFragment : Fragment() {
 
-    protected val authModel by lazy { FirebaseAuthModel() }
+    protected val authModel = FirebaseAuthModel()
 
     protected fun performLogout(loginNavDirection: NavDirections) {
         (activity as? MainActivity)?.clearUserProfile()

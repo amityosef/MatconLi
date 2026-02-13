@@ -5,7 +5,7 @@ import com.colman.matconli.base.MyApplication
 
 object AppLocalDB {
 
-    val db: AppLocalDbRepository by lazy {
+    val db: AppLocalDbRepository = run {
         val context = MyApplication.Globals.appContext
             ?: throw IllegalStateException("Application context not available")
         

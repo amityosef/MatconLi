@@ -10,8 +10,8 @@ class StorageModel {
         CLOUDINARY
     }
 
-    private val firebaseStorage by lazy { FirebaseStorageModel() }
-    private val cloudinaryStorage by lazy { CloudinaryStorageModel() }
+    private val firebaseStorage = FirebaseStorageModel()
+    private val cloudinaryStorage = CloudinaryStorageModel()
 
     fun uploadRecipeImage(api: StorageAPI, image: Bitmap, recipe: Recipe, completion: (String?) -> Unit) {
         when (api) {

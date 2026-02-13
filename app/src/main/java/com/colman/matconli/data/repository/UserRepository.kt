@@ -17,15 +17,15 @@ typealias UserCompletion = (User?) -> Unit
 
 class UserRepository private constructor() {
 
-    private val storageModel by lazy { StorageModel() }
+    private val storageModel = StorageModel()
     private val db = Firebase.firestore
     private val usersCollection = db.collection("users")
     private val executor = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler.createAsync(Looper.getMainLooper())
-    private val database: AppLocalDbRepository by lazy { AppLocalDB.db }
+    private val database: AppLocalDbRepository = AppLocalDB.db
 
     companion object Companion {
-        val shared by lazy { UserRepository() }
+        val shared = UserRepository()
     }
 
     fun getUserById(userId: String, completion: UserCompletion) {

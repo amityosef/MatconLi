@@ -15,14 +15,14 @@ typealias Completion = () -> Unit
 
 class RecipeRepository private constructor() {
 
-    private val storageModel by lazy { StorageModel() }
+    private val storageModel = StorageModel()
     private val firebaseModel = FirebaseModel()
     private val executor = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler.createAsync(Looper.getMainLooper())
-    private val database: AppLocalDbRepository by lazy { AppLocalDB.db }
+    private val database: AppLocalDbRepository = AppLocalDB.db
 
     companion object Companion {
-        val shared by lazy { RecipeRepository() }
+        val shared = RecipeRepository()
     }
 
     fun getAllRecipes(): LiveData<MutableList<Recipe>> {
