@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="AppInsightsSettings">
+    <option name="selectedTabId" value="Firebase Crashlytics" />
     <option name="tabSettings">
       <map>
         <entry key="Firebase Crashlytics">
@@ -8,10 +9,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.colman.matconli" />
+                  <option name="mobileSdkAppId" value="1:1085133517922:android:4f77a511d778adce388d3b" />
+                  <option name="projectId" value="matconli-37b5b" />
+                  <option name="projectNumber" value="1085133517922" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
